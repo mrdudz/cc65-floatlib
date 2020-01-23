@@ -7,18 +7,18 @@
 
 /* math functions */
 
-float _flog(float s);
-float _fexp(float s);
-float _fsqr(float s);
+float __fastcall__ _flog(float s);
+float __fastcall__ _fexp(float s);
+float __fastcall__ _fsqr(float s);
 
-float _fsin(float s);
-float _fcos(float s);
-float _ftan(float s);
-float _fatn(float s);
+float __fastcall__ _fsin(float s);
+float __fastcall__ _fcos(float s);
+float __fastcall__ _ftan(float s);
+float __fastcall__ _fatn(float s);
 
-float _fsgn(float s);
-float _fabs(float s);
-float _fint(float s);
+float __fastcall__ _fsgn(float s);
+float __fastcall__ _fabs(float s);
+float __fastcall__ _fint(float s);
 
 #define flog(_s) _flog((_s))
 #define fexp(_s) _fexp((_s))
@@ -43,8 +43,12 @@ float _fint(float s);
 #define fsqrt(_d,_s) fsqr((_s))
 #define fatan(_d,_s) fatn((_s))
 
+/* FIXME */
+float __fastcall__ _fatan2(float x, float y);
+#define fatan2(_x, _y) _fatan2((_x), (_y))
+
 /* misc */
-float _frnd(float s);
+float __fastcall__ _frnd(float s);
 #define frnd(_s) _frnd((_s))
 
 #if 0
@@ -61,10 +65,7 @@ void _fpoly1(float *d,fpoly *a,float *x);
 /* polynom2 f(x)=a1+a2*x^3+a3*x^5+...+an*x^(2n-1) */
 void _fpoly2(float *d,fpoly *a,float *x);
 
-
-void _fatan2(float *a,float *x,float *y);
-#define fatan2(_d,_x,_y) _fatan2(&(_d),&(_x),&(_y))
-
+#endif
 
 /*
    todo:
@@ -72,8 +73,6 @@ void _fatan2(float *a,float *x,float *y);
     acos,asin,ceil,cosh,floor,fmod,hypot,ldexp,log10,modf,poly,pow10,sinh
     tanh,cabs,_matherr,matherr,
 
- */
-
-#endif
+*/
 
 #endif /* _MATH_H_ */

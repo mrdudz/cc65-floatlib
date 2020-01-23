@@ -11,40 +11,71 @@
 
 unsigned char strbuf[0x20];
 
-float fd,fs;
-float a,b,c1;
-int c,i,t;
+float fd, fs;
+float a, b, c1;
+int c, i, t;
 int n;
 
 void csetpoint8(unsigned char x)
 {
-	while(x--)
-	{
-		printf(" ");
-	}	
-	printf("*\n");
+    while(x--) {
+        printf(" ");
+    }
+    printf("*\n");
 }
 
-#define YNUM	32
-#define YNUM2	16
+void cplot(unsigned char x, unsigned char y)
+{
+    gotoxy(x,y);cputc('*');
+}
 
-#define XNUM	32
-#define XNUM2	16
+#define YNUM    32
+#define YNUM2   16
+
+#define XNUM    32
+#define XNUM2   16
 
 void calcsin(void)
 {
-      for(i=0;i<YNUM;i++)
-      {
+    printf("sinus:\n");
+    for(i = 0; i < YNUM; i++) {
         csetpoint8(XNUM2+(ftoi(fmul(fsin(deg2rad(itof(i),itof(YNUM))),itof(YNUM2)))/(YNUM/XNUM)));
-      }
+    }
 }
-void calccos(void){
-      for(i=0;i<YNUM;i++)
-      {
+
+void calccos(void)
+{
+    printf("cosinus:\n");
+    for(i = 0; i < YNUM; i++) {
         fs=deg2rad(itof(i),itof(YNUM));
         fd=fmul(fcos(fs),itof(YNUM2));
         csetpoint8(XNUM2+(ftoi(fd)/(YNUM/XNUM)));
-      }
+    }
+}
+
+int fx, fy;
+
+#define CYNUM    20
+#define CYNUM2   10
+
+#define CXNUM    20
+#define CXNUM2   10
+
+
+void testatan2(void)
+{
+    for(i = 0; i < YNUM; i++) {
+        fx = CXNUM2+(ftoi(fmul(fsin(deg2rad(itof(i),itof(CYNUM))),itof(CYNUM2)))/(CYNUM/CXNUM));
+        
+        fs = deg2rad(itof(i), itof(CYNUM));
+        fd = fmul(fcos(fs), itof(CYNUM2));
+        fy = CXNUM2 + (ftoi(fd) / (CYNUM/CXNUM));
+        
+        cplot(fx, fy);
+        fd = fatan2(itof(fx-CXNUM2), itof(fy-CYNUM2));
+        _ftostr(strbuf, fd);    
+        cputs(strbuf);
+   }
 }
 
 #if 0
@@ -87,30 +118,28 @@ unsigned char var_j;
 float var_k;
 unsigned short var_co;
 
-
 void f1(void)
 {
-	printf("i:%08lx\n",_ctof(0));
+    printf("i:%08lx\n",_ctof(0));
 
 #if 0
-	printf("exp mantissa sign\n");
-	printf("%02x  ",*(unsigned char*)(1024+(40*2)+0));
-	printf("%02x  ",*(unsigned char*)(1024+(40*2)+1));
-	printf("%02x  ",*(unsigned char*)(1024+(40*2)+2));
-	printf("%02x  ",*(unsigned char*)(1024+(40*2)+3));
-	printf("%02x  ",*(unsigned char*)(1024+(40*2)+4));
-	printf("%02x  ",*(unsigned char*)(1024+(40*2)+5));
+    printf("exp mantissa sign\n");
+    printf("%02x  ",*(unsigned char*)(1024+(40*2)+0));
+    printf("%02x  ",*(unsigned char*)(1024+(40*2)+1));
+    printf("%02x  ",*(unsigned char*)(1024+(40*2)+2));
+    printf("%02x  ",*(unsigned char*)(1024+(40*2)+3));
+    printf("%02x  ",*(unsigned char*)(1024+(40*2)+4));
+    printf("%02x  ",*(unsigned char*)(1024+(40*2)+5));
 #endif
 
-	
-        var_bs=1024;
-        var_fs=55304;
-	
+    var_bs=1024;
+    var_fs=55304;
+
 //        var_i=_itof(var_bs);while(1)
-        var_i=itof(2);while(1)
-        {
-	printf("i:%d\n",ftoi(var_i));
-	var_bs++;if(var_bs==1030)break;
+    var_i=itof(2);while(1)
+    {
+        printf("i:%d\n",ftoi(var_i));
+        var_bs++;if(var_bs==1030)break;
 
 #if 0
         if(FCMPGT(0x00028000,U16TOF(0)))
@@ -125,51 +154,114 @@ void f1(void)
 //        var_i=_fadd(var_i,0x00028000);
         var_i=fadd(var_i,0x00818000);
 //        var_i=_fadd(var_i,_ctof(1));
-	};
+    };
+}
+
+void testconversions(void)
+{
+    b=ctof(42);
+    printf("b:%08lx\n", b);
+    n=ftoi(b);
+    printf("n:%d\n", n);
+
+    b=_utof(42);
+    printf("b:%08lx\n", b);
+    n=ftoi(b);
+    printf("n:%d\n", n);
+
+    b=_stof(1234);
+    printf("b:%08lx\n", b);
+    n=ftoi(b);
+    printf("n:%d\n", n);
+
+    b=itof(1234);
+    printf("b:%08lx\n", b);
+    n=ftoi(b);
+    printf("n:%d\n", n);
+    
+    b=atof("1234");
+    printf("b:%08lx\n", b);
+    n=ftoi(b);
+    printf("n:%d\n", n);
+    ftoa(strbuf, b);
+    printf("s:%s\n", strbuf);
+}
+
+void testbasicmath(void)
+{
+    t=123;
+    fd=itof((int)t); 
+    fs=_fneg(fd);
+    _ftostr(strbuf,fd);    
+    printf("fd:%s\n",strbuf);
+    _ftostr(strbuf,fs);    
+    printf("fs:%s\n",strbuf);
+    
+    a = itof(4321);
+    b = itof(1234);
+    printf("a:%08lx\n", a);
+    printf("b:%08lx\n", b);
+    c1 = fadd(a, b);
+    printf("c1:%08lx\n", c1);
+    ftoa(strbuf, c1);
+    printf("c1:%s\n", strbuf);
+    
+    // 1234 / 60 = 20,5666...
+    t=1234;
+    fd=itof((int)t); 
+    fs=itof((int)60); 
+    fd=fdiv(fd,fs);
+    _ftostr(strbuf,fd);    
+    printf("t:%s\n",strbuf);
+
+    // 5678 / 60 = 94,6333...
+    t=5678;
+    fd=itof((int)t); 
+    fs=itof((int)60); 
+    fd=fdiv(fd,fs);
+    _ftostr(strbuf,fd);    
+    printf("t:%s\n",strbuf);
+}
+
+void testlogical(void)
+{
+    a = itof(0xffa5);
+    b = itof(0x5aff);
+    printf("a:%08lx\n", a);
+    printf("b:%08lx\n", b);
+    c1 = _fand(a, b);
+    printf("c1:%08lx\n", c1);
+    n=ftoi(c1);
+    printf("c1:%04x\n", n);
+}
+
+void testcompare(void)
+{
+    a=itof(2);
+    b=itof(3);
+    printf("cmp 2,3: %d\n", fcmp(a, b));
+    printf("cmp 3,2: %d\n", fcmp(b, a));
+    printf("cmp 2,2: %d\n", fcmp(a, a));
 }
 
 int main(void)
 {
-	printf("\x93 Floattest\n");
+    clrscr();
+    printf("Floattest\n");
 
-	f1();
-
-	b=ctof(2);
-	a=ctof(2);
-	c1=fpow(a,b);
-	printf("a:%x\n",a);
-	printf("b:%x\n",b);
-	printf("a:%d\n",ftoi(a));
-	printf("c1:%d\n",ftoi(c1));
-
-	printf("cmp: %d\n",fcmp(a,b));
-	
-	printf("a+b:%08lx\n",c1);
-
-	n=ftoi(a);
-	printf("n:%d\n",n);
-	n=ftoi(b);
-	printf("n:%d\n",n);
-	n=ftoi(c1);
-	printf("n:%d\n",n);
-
-#if 0
-      calcpoly1();
-#endif
-      
-#if 0
+    testconversions();
+    testbasicmath();
+    testlogical();
+    testcompare();
+    
+#if 0    
+    f1();
+    
     calcsin();
-
-    t=1234;
-    
-    fd=itof((int)t); fs=itof((int)60); fd=fdiv(fd,fs);
-    _ftostr(strbuf,fd);    printf("t:%s\n",strbuf);
-
     calccos();
-
-    t=5678;
-    
-    fd=itof((int)t); fs=itof((int)60); fd=fdiv(fd,fs);
-    _ftostr(strbuf,fd);    printf("t:%s\n",strbuf);
+    testatan2();        // FIXME
+#endif
+#if 0
+    calcpoly1();
 #endif
 }

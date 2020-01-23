@@ -1,3 +1,4 @@
+        .segment "LOWCODE"
 
 ;---------------------------------------------------------------------------------------------
 
@@ -12,113 +13,65 @@ __basicoff:
         cli
         rts
 
-        .importzp sp
-
-;
-; pop y/a from stack. This function will run directly into incsp2x
-;
-; routine saves 2 bytes each call, is 27 bytes long
-; => usage pays off as a size improvement if called atleast 14 times,
-; else 'bloats' the code by 27 bytes ;=)
-;
-
-        .export         popya           ; pop stack into YA (for kernal routines)
-
-popya:  ldy     #1
-   	lda	(sp),y		; get hi byte
-       	tax	     		; into x
-   	dey
-   	lda	(sp),y		; get lo byte
-        ; put parameters in right order for kernal routines
-        tay
-        txa
-;
-; routines for inc/dec'ing sp
-;
-        .export         incsp2x
-
-; do this by hand, cause it gets used a lot
-
-incsp2x: ldx     sp              ; 3
-         inx                     ; 2
-         beq     @L1             ; 2
-         inx                     ; 2
-         beq     @L2             ; 2
-         stx     sp              ; 3
-         rts
-
-@L1:     inx                     ; 2
-@L2:     stx     sp              ; 3
-         inc     sp+1            ; 5
-         rts
-
-
-  .export   __ftostr,__strtof,__ftoi
-  .export   __fcmp,__ftestsgn
-  .export   __ctof,__utof,__itof,__stof
-  .export   __fadd,__fsub,__fmul,__fdiv,__fpow
-  .export   __fand,__for,__fnot,__fneg
-  .export   __fabs, __fatn, __fcos, __fexp, __fint, __flog,__frnd
-  .export   __fsgn, __fsin, __fsqr, __ftan,__fnot,__fround
-  .export   __fpoly1,__fpoly2
-
-  .import   popa,popax,pushax,pusha
-  .importzp ptr1
-
-  .include  "float.inc"
-
 ;---------------------------------------------------------------------------------------------
 ; first come the actual stubs to floating point routines, these are ment to be
 ; used from further written ml-math routines aswell. (maybe also from the compiler?!)
 ;---------------------------------------------------------------------------------------------
+
+        .include  "float.inc"
+        
+        .import sreg
 
 ;---------------------------------------------------------------------------------------------
 ; converter integer types to float
 ;---------------------------------------------------------------------------------------------
 
 ___float_s8_to_fac:
-        jsr popa
         ;a: low
 __float_s8_to_fac:
         jsr __basicon
         jsr BASIC_s8_to_FAC
         jmp __basicoff
-;       rts
 
 ___float_u8_to_fac:
-        jsr popa
         ;a: low
+        tay
+        ;y: low
 __float_u8_to_fac:
         jsr __basicon
         jsr BASIC_u8_to_FAC
         jmp __basicoff
-;       rts
-
+        
+; get C-parameter (signed int), convert to FAC
 ___float_s16_to_fac:
-        jsr popya
         ;a: low x: high
-;        tay
-;        txa
-__float_s16_to_fac:
-        jsr __basicon
+        tay
+        txa
         ;y: low a: high
+        
+; convert signed int (YA) to FAC
+__float_s16_to_fac:
+        jsr __basicon           ; enable BASIC (trashes X)
         jsr BASIC_s16_to_FAC
         jmp __basicoff
-;       rts
-
+       
+; get C-parameter (unsigned short), convert to FAC          
 ___float_u16_to_fac:
-        jsr popax
         ;a: low x: high
+        tay
+        txa
+        ;y: low a: high
+        
 __float_u16_to_fac:
-        stx $62
-        sta $63
+        sta $62
+        sty $63
         jsr __basicon
         ldx #$90
         sec
         jsr BASIC_u16_to_FAC
         jmp __basicoff
-;       rts
 
+; return to C, FAC as unsigned int
 __float_fac_to_u16:
         jsr __basicon
         jsr BASIC_FAC_to_u16
@@ -126,6 +79,7 @@ __float_fac_to_u16:
         ldx $64
         lda $65
         rts
+        
 ;---------------------------------------------------------------------------------------------
 ; converter float to string and back
 ;---------------------------------------------------------------------------------------------
@@ -134,10 +88,9 @@ __float_fac_to_str:
         jsr __basicon
         jsr BASIC_FAC_to_string
         jmp __basicoff
-;        rts
 
 ___float_str_to_fac:
-        jsr popax
+;        jsr popax
 __float_str_to_fac:
         sta $22
         stx $23
@@ -152,46 +105,23 @@ __float_str_to_fac:
         jmp __basicoff
 
 ;---------------------------------------------------------------------------------------------
-; load float from memory to fac and/or arg and back for further processing
-; we cant use the routines from basic for this task since source adress
-; may be located in the same bank as basic rom.
-;---------------------------------------------------------------------------------------------
 
-	.import ldeaxysp, incsp4
-
+; get C-parameter (float), convert to FAC        
 ___float_float_to_fac:
-;        jsr popax ; ptr to float
-		  
- 	ldy     #$03
- 	jsr     ldeaxysp
         sta $63 ; mantissa
         stx $62 ; mantissa
-	ldy     sreg
+        ldy sreg
         sty $61 ; exp
-	ldy     sreg+1
+        ldy sreg+1
         sty $66 ; sign
-	
+
         ldx #$00
-	stx $64 ; mantissa
-	stx $65 ; mantissa
-		
+        stx $64 ; mantissa
+        stx $65 ; mantissa
+
         stx $70
-
-	.if 1=0
-
-	ldx #0
-@l:
-	lda $61,x
-	sta $0400+(0*40),x
-	inx
-	cpx #6
-	bne @l
-
-	.endif
-		
-	jmp     incsp4
-; 	rts
-
+        rts
+        
 __float_float_to_fac:
         sta ptr1
         stx ptr1+1
@@ -221,50 +151,28 @@ __float_float_to_fac:
 ;        sta $6f
         rts
 
-; get two floats, to FAC and ARG
-
+; get C-parameter (two floats), to FAC and ARG
 ___float_float_to_fac_arg:
-        ;jsr popax ; ptr to float
-        jsr ___float_float_to_fac    ; also pops pointer to float
+        jsr ___float_float_to_fac
 ___float_float_to_arg:
-;        jsr popax ; ptr to float
-
- 	ldy     #$03
- 	jsr     ldeaxysp
-	; 1
-        sta $6b ; mantissa
-	; 2
-        stx $6a ; mantissa
-
-	ldy     sreg
-	; 3
-        sty $69 ; exp
+        ldy #$03
+        jsr ldeaxysp
+        sta $6b ; 1 mantissa
+        stx $6a ; 2 mantissa
+        ldy sreg
+        sty $69 ; 3 exp
 
         ldx #$00
-	stx $6c ; mantissa
-	stx $6d ; mantissa
-			
-	lda     sreg+1
-	; 4
+        stx $6c ; mantissa
+        stx $6d ; mantissa
+
+        lda sreg+1 ; 4
+
         sta $6e ; sign
         eor $66 ; sign FAC
         sta $6f
 
-	.if 1=0
-			
-	ldx #0
-@l:
-	lda $69,x
-	sta $0400+(1*40),x
-	inx
-	cpx #6
-	bne @l
-
-	.endif
-			
-	jmp     incsp4
-;	rts
-
+        jmp incsp4
         
 __float_float_to_arg:
         sta ptr1
@@ -291,45 +199,19 @@ __float_float_to_arg:
         eor $66
         sta $6f
         rts
-
-	.importzp sreg
-
-;
-;	return 32bit float value
-;
-			
+        
+; return to C, float as unsigned long
 ___float_fac_to_float:
 
-	.if 1=0
-	ldx #0
-@l:
-	lda $61,x
-	sta $0400+(2*40),x
-	inx
-	cpx #6
-	bne @l
-	.endif	
-
+        ; return as LONG
         lda $66 ; sign
-	sta     sreg+1 ; 1
+        sta sreg+1 ; 1
 
-			
-        lda $61 ; exp
-	sta     sreg   ; 2
-	; 3
-        ldx $62 ; mantissa
-	; 4
-        lda $63; mantissa
-	
-; 	lda #$12
-; 	sta     sreg+1 ; 1
-; 	lda #$34
-; 	sta     sreg
-; 	ldx #$56
-; 	lda #$78
-	rts
-
-;        jsr popax ; ptr to float
+        lda $61     ; exp
+        sta sreg    ; 2
+        ldx $62     ; 3 mantissa
+        lda $63     ; 4 mantissa
+        rts        
 
 __float_fac_to_float:
         sta ptr1
@@ -357,55 +239,59 @@ __float_fac_to_float:
 __float_fac_to_float_packed:
         sta ptr1
         stx ptr1+1
-	ldy #4
+        ldy #4
         lda $65
         sta (ptr1),y
-	dey
+        dey
         lda $64
         sta (ptr1),y
-	dey
+        dey
         lda $63
         sta (ptr1),y
-	dey
-	lda #$66
-	ora #$7f
-	and $62
+        dey
+        lda #$66
+        ora #$7f
+        and $62
         sta (ptr1),y
-	dey
+        dey
         lda $61
         sta (ptr1),y
-	rts
-
+        rts
+        
 __float_arg_to_float_packed:
         sta ptr1
         stx ptr1+1
-	ldy #4
+        ldy #4
         lda $65+8
         sta (ptr1),y
-	dey
+        dey
         lda $64+8
         sta (ptr1),y
-	dey
+        dey
         lda $63+8
         sta (ptr1),y
-	dey
-	lda #$66+8
-	ora #$7f
-	and $62+8
+        dey
+        lda #$66+8
+        ora #$7f
+        and $62+8
         sta (ptr1),y
-	dey
+        dey
         lda $61+8
         sta (ptr1),y
-	rts
-
+        rts
+        
 ;---------------------------------------------------------------------------------------------
 
+        .export __ftostr
+        .importzp ptr1
+        .import popax, ldeaxysp, incsp4
+
 ; convert float to string
-; void _ftos(char *d,FLOATFAC *s)
+; void __fastcall__ _ftostr(char *d, float s);
+;-> void __fastcall__ _ftostr(char *d, unsigned long s);
 
 __ftostr:
-        ;jsr popax ; ptr to float
-        jsr ___float_float_to_fac    ; also pops pointer to float
+        jsr ___float_float_to_fac
         jsr __float_fac_to_str
 
 ___float_strbuf_to_string:
@@ -423,107 +309,75 @@ __float_strbuf_to_string:
 @s:
         rts
 
+        .export __strtof
+        
+; convert a string to a float        
+; float __fastcall__ _strtof(char *d);        
+;-> unsigned long __fastcall__ _strtof(char *d);        
 __strtof:
         jsr ___float_str_to_fac
-        jmp ___float_fac_to_float    ; also pops pointer to float
-;        rts
+        jmp ___float_fac_to_float
+
+        .export __ctof
 
 ; convert char to float
-; void _ctof(FLOATFAC *f,char v);
+; float __fastcall__ _ctof(char v);
+;-> unsigned long __fastcall__ _ctof(char v);
  __ctof:
-        ;jsr popa  ; char
         jsr ___float_s8_to_fac
-        ;jsr popax ; ptr to float
         jmp ___float_fac_to_float
-        ;rts
 
+        .export __utof
+        
 ; convert unsigned char to float
-; void _utof(FLOATFAC *f,unsigned char v);
+; float __fastcall__ _utof(unsigned char v);
+;-> unsigned long __fastcall__ _utof(unsigned char v);
  __utof:
-        ;jsr popa  ; char
         jsr ___float_u8_to_fac
-        ;jsr popax ; ptr to float
         jmp ___float_fac_to_float
-        ;rts
 
+        .export __stof
+        
 ; convert short to float
-; void _stof(FLOATFAC *f,unsigned short v);
+; float __fastcall__ _stof(unsigned short v);
+;-> unsigned long __fastcall__ _stof(unsigned short v);
  __stof:
-;        jsr popax
-;        sta $62
-;        stx $63
-;        sec
-;        ldx #$90
         jsr ___float_u16_to_fac
-        ;jsr popax ; ptr to float
         jmp ___float_fac_to_float
-        ;rts
+
+        .export __itof
 
 ; convert integer to float
-; void _itof(FLOATFAC *f,int v);
+; float __fastcall__ _itof(int v);
+;-> unsigned long __fastcall__ _itof(int v);
  __itof:
-        ;jsr popya ; integer
-;        tay
-;        txa
-        ;y: low a: high
+        ;a: low x: high
         jsr ___float_s16_to_fac
-        ;jsr popax ; ptr to float
         jmp ___float_fac_to_float
-        ;rts
 
+        .export __ftoi
+        
 ; convert float to integer
-; void _itof(FLOATFAC *f);
+; int __fastcall__ _ftoi(float f);
+;-> int __fastcall__ _ftoi(unsigned long f);
  __ftoi:
-        jsr ___float_float_to_fac    ; also pops pointer to float
-
-; /*	lda $61+0
-; 	sta $0450+0
-; 	lda $61+1
-; 	sta $0450+1
-; 	lda $61+2
-; 	sta $0450+2
-; 	lda $61+3
-; 	sta $0450+3
-; 	lda $61+4
-; 	sta $0450+4
-; 	lda $61+5
-; 	sta $0450+5*/
-        
-        jsr __float_fac_to_u16
-
-; ; 	ldy $61+0
-; ; 	sty $0478+0
-; ; 	ldy $61+1
-; ; 	sty $0478+1
-; ; 	ldy $61+2
-; ; 	sty $0478+2
-; ; 	ldy $61+3
-; ; 	sty $0478+3
-; ; 	ldy $61+4
-; ; 	sty $0478+4
-; ; 	ldy $61+5
-; ; 	sty $0478+5
-
-        
-;       ldx #$12
-;       lda #$34
-;        jmp pushax ; ptr to integer
-        rts
+        jsr ___float_float_to_fac
+        jmp __float_fac_to_u16
 
 ;---------------------------------------------------------------------------------------------
 ; these functions take one arg (in FAC) and return result (in FAC) aswell
 ;---------------------------------------------------------------------------------------------
 
 .macro __ffunc1 addr
-        ;jsr popax ; ptr to float
-        jsr ___float_float_to_fac    ; also pops pointer to float
+        jsr ___float_float_to_fac
         jsr __basicon
         jsr addr
         jsr __basicoff
-;        jsr popax ; ptr to float
-        jmp ___float_fac_to_float    ; also pops pointer to float
-        ;rts
+        jmp ___float_fac_to_float
 .endmacro
+
+        .export __fabs, __fatn, __fcos, __fexp, __fint, __flog
+        .export __frnd, __fsgn, __fsin, __fsqr, __ftan, __fnot, __fround
 
 __fabs:    __ffunc1 BASIC_FAC_Abs
 __fatn:    __ffunc1 BASIC_FAC_Atn
@@ -540,93 +394,90 @@ __fsqr:    __ffunc1 BASIC_FAC_Sqr
 __ftan:    __ffunc1 BASIC_FAC_Tan
 __fnot:    __ffunc1 BASIC_FAC_Not
 __fround:  __ffunc1 BASIC_FAC_Round
-
+        
 ;---------------------------------------------------------------------------------------------
 ; these functions take two args (in FAC and ARG) and return result (in FAC)
 ;---------------------------------------------------------------------------------------------
-
+        
 __float_ret2:
 
         ;jsr __basicoff
         ldx #$36
         stx $01
         cli
-;        jsr popax ; ptr to float
         jmp ___float_fac_to_float    ; also pops pointer to float
-        ;rts
 
 .macro __ffunc2a addr
-        ;jsr popax ; ptr to float
-        ;jsr ___float_float_to_fac    ; also pops pointer to float
-        ;jsr popax ; ptr to float
-        ;jsr ___float_float_to_arg    ; also pops pointer to float
         jsr ___float_float_to_fac_arg
         jsr __basicon
         lda $61
         jsr addr
         jmp __float_ret2
-;        jsr __basicoff
-;        jsr popax ; ptr to float
-;        jmp ___float_fac_to_float    ; also pops pointer to float
-        ;rts
 .endmacro
 
 .macro __ffunc2b addr
-        ;jsr popax ; ptr to float
-        ;jsr ___float_float_to_fac    ; also pops pointer to float
-        ;jsr popax ; ptr to float
-        ;jsr ___float_float_to_arg    ; also pops pointer to float
         jsr ___float_float_to_fac_arg
         jsr __basicon
         jsr addr
         jmp __float_ret2
-;        jsr __basicoff
-;        jsr popax ; ptr to float
-;        jmp ___float_fac_to_float    ; also pops pointer to float
-        ;rts
 .endmacro
+        
+        .export __fadd, __fsub, __fmul, __fdiv, __fpow
 
+; float __fastcall__ _fadd(float f, float a);        
+;-> unsigned long __fastcall__ _fadd(unsigned long f, unsigned long a);        
 __fadd:   __ffunc2a BASIC_ARG_FAC_Add
 __fsub:   __ffunc2a BASIC_ARG_FAC_Sub
 __fmul:   __ffunc2a BASIC_ARG_FAC_Mul
 __fdiv:   __ffunc2a BASIC_ARG_FAC_Div
 __fpow:   __ffunc2a BASIC_ARG_FAC_Pow
 
+        .export __fand, __for
+
 __fand:   __ffunc2b BASIC_ARG_FAC_And
 __for:    __ffunc2b BASIC_ARG_FAC_Or
-
+        
 __float_ret3:
-
         ;jsr __basicoff
         ldx #$36
         stx $01
         cli
         ; a=0 (==) / a=1 (>) / a=255 (<)
-	ldx #0
-;        jmp pushax
-        rts
+        ldx #0
+        rts  
+        
+        .bss
+        
+tempfloat:
+        .res 5
 
-tempfloat:	.res 5
-			
+        .SEGMENT "LOWCODE"
+        
+        .export __fcmp
+        
 __fcmp:
         jsr ___float_float_to_fac_arg
-	lda #<tempfloat
-	ldx #>tempfloat
-	jsr __float_arg_to_float_packed
+        lda #<tempfloat
+        ldx #>tempfloat
+        jsr __float_arg_to_float_packed
         lda #<tempfloat
         ldy #>tempfloat
 ___float_cmp_fac_arg:
         jsr __basicon
+        ; in: FAC=(x1) a/y= ptr lo/hi to x2
         jsr BASIC_FAC_cmp
         jmp __float_ret3
 
+        .export __ftestsgn
+        
 __ftestsgn:
         jsr ___float_float_to_fac
 ;___float_testsgn_fac:
         jsr __basicon
+        ; in: FAC(x1)
         jsr BASIC_FAC_testsgn
         jmp __float_ret3
-
+        
 ___float_testsgn_fac:
         lda $61
         beq @s
@@ -652,9 +503,13 @@ ___float_testsgn_arg:
 ;---------------------------------------------------------------------------------------------
 ; polynom1 f(x)=a1+a2*x^2+a3*x^3+...+an*x^n
 ;---------------------------------------------------------------------------------------------
+        .export __fpoly1
 __fpoly1:
         jsr ___float_float_to_fac
-        jsr popya
+        ;jsr popya
+        jsr popax
+        tay
+        txa
         jsr __basicon
         jsr BASIC_FAC_Poly1
         jmp __float_ret2
@@ -662,13 +517,19 @@ __fpoly1:
 ;---------------------------------------------------------------------------------------------
 ; polynom2 f(x)=a1+a2*x^3+a3*x^5+...+an*x^(2n-1)
 ;---------------------------------------------------------------------------------------------
+        .export __fpoly2
 __fpoly2:
         jsr ___float_float_to_fac
-        jsr popya
+        ;jsr popya
+        jsr popax
+        tay
+        txa
         jsr __basicon
         jsr BASIC_FAC_Poly1
         jmp __float_ret2
-
+        
+;---------------------------------------------------------------------------------------------
+        
 __float_atn_fac:
         jsr __basicon
         jsr BASIC_FAC_Atn
@@ -683,7 +544,7 @@ __float_add_fac_arg:
         lda $61
         jsr BASIC_ARG_FAC_Add
         jmp __basicoff
-
+        
 __float_swap_fac_arg:
         lda   $61
         ldx   $69
@@ -710,34 +571,28 @@ __float_swap_fac_arg:
         stx   $66
         sta   $6e
         rts
-
-
+        
+        .export __fneg
 __fneg:
-        jsr ___float_float_to_fac    ; also pops pointer to float
+        jsr ___float_float_to_fac
 
-	LDA $61       ; FAC Exponent
-	BEQ @sk
-	LDA $66       ; FAC Sign
-	EOR #$FF
-	STA $66       ; FAC Sign
+        lda $61       ; FAC Exponent
+        beq @sk
+        lda $66       ; FAC Sign
+        eor #$FF
+        sta $66       ; FAC Sign
 @sk:
-        jmp ___float_fac_to_float    ; also pops pointer to float
-;	RTS
-
-        .export __f_0,__f_256
-        .export __f_pi2,__f_pi,__f_1pi2,__f_2pi
-
-__f_0:    .byte $00,$80+$00,$00,$00,$00,$00
-__f_256:  .byte $89,$80+$00,$00,$00,$00,$00
-
+        jmp ___float_fac_to_float
+        
+        
 __f_pi2:  .byte $81,$80+$49,$0f,$da,$a1,$00
 __f_pi:   .byte $82,$80+$49,$0f,$da,$a1,$00
 __f_1pi2: .byte $83,$80+$16,$cb,$e3,$f9,$00
-__f_2pi:  .byte $83,$80+$49,$0f,$da,$a1,$00
 
         .export __fatan2
 
-; void _fatan2(float *a,float *x,float *y)
+; float _fatan2(float x, float y)
+;-> unsigned long _fatan2(unsigned long x, unsigned long y)
 __fatan2:
 
         jsr ___float_float_to_fac_arg
@@ -785,3 +640,4 @@ __fatan2:
                         ldx #>__f_1pi2
                         jsr __float_float_to_fac
                         jmp __float_ret2
+        

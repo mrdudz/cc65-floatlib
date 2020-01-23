@@ -33,47 +33,49 @@ typedef struct {
 #define double float
 
 /* integer convertion routines */
-float _ctof(char v);
-float _utof(unsigned char v);
-float _itof(int v);
-float _stof(unsigned short v);
+float __fastcall__ _ctof(char v);
+float __fastcall__ _utof(unsigned char v);
+float __fastcall__ _itof(int v);
+float __fastcall__ _stof(unsigned short v);
 
-int _ftoi(float f);
+int __fastcall__ _ftoi(float f);
 
 /* arithmetic functions */
-float _fdiv(float f,float a);
-float _fmul(float f,float a);
-float _fadd(float f,float a);
-float _fsub(float f,float a);
-float _fpow(float f,float a);
+float __fastcall__ _fdiv(float f, float a);
+float __fastcall__ _fmul(float f, float a);
+float __fastcall__ _fadd(float f, float a);
+float __fastcall__ _fsub(float f, float a);
+float __fastcall__ _fpow(float f, float a);
 
-float _fneg(float f);
+float __fastcall__ _fneg(float f);
 
 /* string convertion routines */
-void _ftostr(char *d,float s); /* for vsprintf */
-float _strtof(char *d);
+void __fastcall__ _ftostr(char *d, float s); /* for vsprintf */
+float __fastcall__ _strtof(char *d);
 
 /* logical functions */
-float _fand(float f,float a);
-float _for(float f,float a);
-float _fnot(float f);
+float __fastcall__ _fand(float f, float a);
+float __fastcall__ _for(float f, float a);
+float __fastcall__ _fnot(float f);
 
-unsigned char _fcmp(float f,float a);
+unsigned char __fastcall__ _fcmp(float f, float a);
 
-unsigned char _ftestsgn(float f); /* fixme */
+unsigned char __fastcall__ _ftestsgn(float f); /* fixme */
 
 #define ctof(_s) _ctof((_s))
-#define atof(_s) _stof((_s))
 #define itof(_s) _itof((_s))
 #define ftoi(_s) _ftoi((_s))
 
-#define fdiv(_f,_a) _fdiv((_f),(_a))
-#define fmul(_f,_a) _fmul((_f),(_a))
-#define fadd(_f,_a) _fadd((_f),(_a))
-#define fsub(_f,_a) _fsub((_f),(_a))
-#define fpow(_f,_a) _fpow((_f),(_a))
+#define atof(_s) _strtof((_s))
+#define ftoa(_s, _f) _ftostr((_s), (_f))
 
-#define fcmp(_d,_s) _fcmp((_d),(_s))
+#define fdiv(_f, _a) _fdiv((_f), (_a))
+#define fmul(_f, _a) _fmul((_f), (_a))
+#define fadd(_f, _a) _fadd((_f), (_a))
+#define fsub(_f, _a) _fsub((_f), (_a))
+#define fpow(_f, _a) _fpow((_f), (_a))
+
+#define fcmp(_d, _s) _fcmp((_d), (_s))
 
 
 /*
