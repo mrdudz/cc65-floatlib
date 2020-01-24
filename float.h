@@ -50,7 +50,7 @@ float __fastcall__ _fpow(float f, float a);
 float __fastcall__ _fneg(float f);
 
 /* string convertion routines */
-void __fastcall__ _ftostr(char *d, float s); /* for vsprintf */
+char * __fastcall__ _ftostr(char *d, float s); /* for vsprintf */
 float __fastcall__ _strtof(char *d);
 
 /* logical functions */
@@ -58,6 +58,7 @@ float __fastcall__ _fand(float f, float a);
 float __fastcall__ _for(float f, float a);
 float __fastcall__ _fnot(float f);
 
+/* compare two floats, returns 0 if f = a, 1 if f < a, 255 if f > a */
 unsigned char __fastcall__ _fcmp(float f, float a);
 
 unsigned char __fastcall__ _ftestsgn(float f); /* fixme */
@@ -66,8 +67,10 @@ unsigned char __fastcall__ _ftestsgn(float f); /* fixme */
 #define itof(_s) _itof((_s))
 #define ftoi(_s) _ftoi((_s))
 
-#define atof(_s) _strtof((_s))
-#define ftoa(_s, _f) _ftostr((_s), (_f))
+#define atof(_s)        _strtof((_s))
+#define ftoa(_s, _f)    _ftostr((_s), (_f))
+
+#define fneg(_s)        _fneg((_s))
 
 #define fdiv(_f, _a) _fdiv((_f), (_a))
 #define fmul(_f, _a) _fmul((_f), (_a))
@@ -75,7 +78,10 @@ unsigned char __fastcall__ _ftestsgn(float f); /* fixme */
 #define fsub(_f, _a) _fsub((_f), (_a))
 #define fpow(_f, _a) _fpow((_f), (_a))
 
-#define fcmp(_d, _s) _fcmp((_d), (_s))
+#define fcmp(_d, _s)    _fcmp((_d), (_s))
+#define fcmplt(_d, _s)  (_fcmp((_d), (_s)) == 1)
+#define fcmpgt(_d, _s)  (_fcmp((_d), (_s)) == 255)
+#define fcmpeq(_d, _s)  (_fcmp((_d), (_s)) == 0)
 
 
 /*

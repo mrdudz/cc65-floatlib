@@ -7,7 +7,7 @@ right now CC65 does not support floats by itself, this library is a wrapper to t
 
 TODO:
 
-- actually use IEEE floats
+- actually use IEEE floats, the current code uses some funny binary format :)
 - fix atan2
 - fix the polynom calculation functions
 - implement more missing functions

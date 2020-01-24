@@ -20,7 +20,7 @@ __basicoff:
 
         .include  "float.inc"
         
-        .import sreg
+        .importzp sreg, ptr1
 
 ;---------------------------------------------------------------------------------------------
 ; converter integer types to float
@@ -287,8 +287,8 @@ __float_arg_to_float_packed:
         .import popax, ldeaxysp, incsp4
 
 ; convert float to string
-; void __fastcall__ _ftostr(char *d, float s);
-;-> void __fastcall__ _ftostr(char *d, unsigned long s);
+; char* __fastcall__ _ftostr(char *d, float s);
+;-> char* __fastcall__ _ftostr(char *d, unsigned long s);
 
 __ftostr:
         jsr ___float_float_to_fac
@@ -307,6 +307,8 @@ __float_strbuf_to_string:
         iny
         bne @l
 @s:
+        lda ptr1
+        ldx ptr1+1
         rts
 
         .export __strtof
@@ -442,7 +444,6 @@ __float_ret3:
         ldx #$36
         stx $01
         cli
-        ; a=0 (==) / a=1 (>) / a=255 (<)
         ldx #0
         rts  
         
@@ -466,6 +467,7 @@ ___float_cmp_fac_arg:
         jsr __basicon
         ; in: FAC=(x1) a/y= ptr lo/hi to x2
         jsr BASIC_FAC_cmp
+        ; a=0 (==) / a=1 (>) / a=255 (<)
         jmp __float_ret3
 
         .export __ftestsgn

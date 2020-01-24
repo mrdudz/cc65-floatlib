@@ -30,18 +30,18 @@ float __fastcall__ _fint(float s);
 #define fatn(_s) _fatn((_s))
 
 /* some float constants */
-#define _f_2pi	0x0083c90f
-#define _f_pi	0x0082c90f
+#define _f_2pi  0x0083c90f
+#define _f_pi   0x0082c90f
 
-#define M_PI	_f_pi
+#define M_PI    _f_pi
 
 /* degrees to radiants */
-#define deg2rad(_fs,_n) fmul(fdiv(_fs,_n),_f_2pi)
-/* radiants to degrees deg=(rad/(2*pi))*256 */
-#define rad2deg(_rad,_n)  fmul(fdiv(_rad,_f_2pi),_n)
+#define deg2rad(_fs, _n) fmul(fdiv(_fs, _n), _f_2pi)
+/* radiants to degrees deg = (rad / (2 * pi)) * 256 */
+#define rad2deg(_rad, _n)  fmul(fdiv(_rad, _f_2pi), _n)
 
-#define fsqrt(_d,_s) fsqr((_s))
-#define fatan(_d,_s) fatn((_s))
+#define fsqrt(_s) fsqr((_s))
+#define fatan(_s) fatn((_s))
 
 /* FIXME */
 float __fastcall__ _fatan2(float x, float y);
@@ -74,5 +74,7 @@ void _fpoly2(float *d,fpoly *a,float *x);
     tanh,cabs,_matherr,matherr,
 
 */
+
+float ffloor(float x);
 
 #endif /* _MATH_H_ */

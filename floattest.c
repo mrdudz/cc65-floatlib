@@ -10,6 +10,8 @@
 #define time() clock()
 
 unsigned char strbuf[0x20];
+unsigned char strbuf2[0x20];
+unsigned char strbuf3[0x20];
 
 float fd, fs;
 float a, b, c1;
@@ -185,6 +187,14 @@ void testconversions(void)
     printf("n:%d\n", n);
     ftoa(strbuf, b);
     printf("s:%s\n", strbuf);
+
+    printf("a:%s\n", _ftostr(strbuf, itof(1234)));
+    
+    printf("a:%s b:%s c:%s\n",
+           _ftostr(strbuf, itof(1234)),
+           _ftostr(strbuf2, itof(5678)),
+           _ftostr(strbuf3, itof(9012)),
+          );
 }
 
 void testbasicmath(void)
@@ -239,9 +249,9 @@ void testcompare(void)
 {
     a=itof(2);
     b=itof(3);
-    printf("cmp 2,3: %d\n", fcmp(a, b));
-    printf("cmp 3,2: %d\n", fcmp(b, a));
-    printf("cmp 2,2: %d\n", fcmp(a, a));
+    printf("cmp 2,3: %3d %d %d %d\n", fcmp(a, b), fcmpgt(a, b), fcmpeq(a, b), fcmplt(a, b));
+    printf("cmp 3,2: %3d %d %d %d\n", fcmp(b, a), fcmpgt(b, a), fcmpeq(b, a), fcmplt(b, a));
+    printf("cmp 2,2: %3d %d %d %d\n", fcmp(a, a), fcmpgt(a, a), fcmpeq(a, a), fcmplt(a, a));
 }
 
 int main(void)
@@ -249,9 +259,9 @@ int main(void)
     clrscr();
     printf("Floattest\n");
 
-    testconversions();
-    testbasicmath();
-    testlogical();
+//    testconversions();
+//    testbasicmath();
+//    testlogical();
     testcompare();
     
 #if 0    
