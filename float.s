@@ -63,8 +63,8 @@ ___float_u16_to_fac:
         ;y: low a: high
         
 __float_u16_to_fac:
-        sta $62
-        sty $63
+        sta FAC_MANTISSA0
+        sty FAC_MANTISSA1
         jsr __basicon
         ldx #$90
         sec
@@ -76,8 +76,8 @@ __float_fac_to_u16:
         jsr __basicon
         jsr BASIC_FAC_to_u16
         jsr __basicoff
-        ldx $64
-        lda $65
+        ldx FAC_MANTISSA2
+        lda FAC_MANTISSA3
         rts
         
 ;---------------------------------------------------------------------------------------------
@@ -108,47 +108,49 @@ __float_str_to_fac:
 
 ; get C-parameter (float), convert to FAC        
 ___float_float_to_fac:
-        sta $63 ; mantissa
-        stx $62 ; mantissa
+        sta FAC_MANTISSA1
+        stx FAC_MANTISSA0
         ldy sreg
-        sty $61 ; exp
+        sty FAC_EXPONENT
         ldy sreg+1
-        sty $66 ; sign
+        sty FAC_SIGN
 
         ldx #$00
-        stx $64 ; mantissa
-        stx $65 ; mantissa
+        stx FAC_MANTISSA2
+        stx FAC_MANTISSA3
 
-        stx $70
+        stx FAC_ROUNDING
         rts
         
-__float_float_to_fac:
+; load BASIC float into FAC        
+; in: pointer (a/x) to BASIC float (not packed)        
+__float_float_to_fac:   ; only used in ATAN2?
         sta ptr1
         stx ptr1+1
         ldy #$00
         lda (ptr1),y
-        sta $61
+        sta FAC_EXPONENT
         iny
         lda (ptr1),y
-        sta $62
+        sta FAC_MANTISSA0
         iny
         lda (ptr1),y
-        sta $63
+        sta FAC_MANTISSA1
         iny
         lda (ptr1),y
-        sta $64
+        sta FAC_MANTISSA2
         iny
         lda (ptr1),y
-        sta $65
+        sta FAC_MANTISSA3
         iny
         lda (ptr1),y
-        sta $66
+        sta FAC_SIGN
         ldx #$00
-        stx $70
-         ; always load arg after fac so these can
-         ; be removed in funcs that only take fac
-;        eor $6e
-;        sta $6f
+        stx FAC_ROUNDING
+        ; always load arg after fac so these can
+        ; be removed in funcs that only take fac
+        eor ARG_SIGN
+        sta FAC_SIGN_COMPARE
         rts
 
 ; get C-parameter (two floats), to FAC and ARG
@@ -157,126 +159,136 @@ ___float_float_to_fac_arg:
 ___float_float_to_arg:
         ldy #$03
         jsr ldeaxysp
-        sta $6b ; 1 mantissa
-        stx $6a ; 2 mantissa
+        sta ARG_MANTISSA1
+        stx ARG_MANTISSA0
         ldy sreg
-        sty $69 ; 3 exp
+        sty ARG_EXPONENT
 
         ldx #$00
-        stx $6c ; mantissa
-        stx $6d ; mantissa
+        stx ARG_MANTISSA2
+        stx ARG_MANTISSA3
 
-        lda sreg+1 ; 4
+        lda sreg+1
 
-        sta $6e ; sign
-        eor $66 ; sign FAC
-        sta $6f
+        sta ARG_SIGN
+        eor FAC_SIGN
+        sta FAC_SIGN_COMPARE ; sign compare
 
         jmp incsp4
-        
-__float_float_to_arg:
+
+; load BASIC float into ARG
+; in: pointer (a/x) to BASIC float (not packed)        
+__float_float_to_arg:   ; only used in ATAN2?
         sta ptr1
         stx ptr1+1
         ldy #$00
         lda (ptr1),y
-        sta $69
+        sta ARG_EXPONENT
         iny
         lda (ptr1),y
-        sta $6a
+        sta ARG_MANTISSA0
         iny
         lda (ptr1),y
-        sta $6b
+        sta ARG_MANTISSA1
         iny
         lda (ptr1),y
-        sta $6c
+        sta ARG_MANTISSA2
         iny
         lda (ptr1),y
-        sta $6d
+        sta ARG_MANTISSA3
         iny
         lda (ptr1),y
-        sta $6e
+        sta ARG_SIGN
         ; sign compare
-        eor $66
-        sta $6f
+        eor FAC_SIGN
+        sta FAC_SIGN_COMPARE
         rts
         
 ; return to C, float as unsigned long
 ___float_fac_to_float:
 
         ; return as LONG
-        lda $66 ; sign
-        sta sreg+1 ; 1
+        lda FAC_SIGN
+        sta sreg+1
 
-        lda $61     ; exp
-        sta sreg    ; 2
-        ldx $62     ; 3 mantissa
-        lda $63     ; 4 mantissa
+        lda FAC_EXPONENT
+        sta sreg
+        ldx FAC_MANTISSA0
+        lda FAC_MANTISSA1
         rts        
 
-__float_fac_to_float:
-        sta ptr1
-        stx ptr1+1
-        ldy #$00
-        lda $61
-        sta (ptr1),y
-        iny
-        lda $62
-        sta (ptr1),y
-        iny
-        lda $63
-        sta (ptr1),y
-        iny
-        lda $64
-        sta (ptr1),y
-        iny
-        lda $65
-        sta (ptr1),y
-        iny
-        lda $66
-        sta (ptr1),y
-        rts
+;; store float in memory        
+;; in: dest. pointer (a/x), float in FAC
+;__float_fac_to_float:   ; UNUSED
+;        sta ptr1
+;        stx ptr1+1
+;        ldy #$00
+;        lda FAC_EXPONENT
+;        sta (ptr1),y
+;        iny
+;        lda FAC_MANTISSA0
+;        sta (ptr1),y
+;        iny
+;        lda FAC_MANTISSA1
+;        sta (ptr1),y
+;        iny
+;        lda FAC_MANTISSA2
+;        sta (ptr1),y
+;        iny
+;        lda FAC_MANTISSA3
+;        sta (ptr1),y
+;        iny
+;        lda FAC_SIGN
+;        sta (ptr1),y
+;        rts
 
-__float_fac_to_float_packed:
-        sta ptr1
-        stx ptr1+1
-        ldy #4
-        lda $65
-        sta (ptr1),y
-        dey
-        lda $64
-        sta (ptr1),y
-        dey
-        lda $63
-        sta (ptr1),y
-        dey
-        lda #$66
-        ora #$7f
-        and $62
-        sta (ptr1),y
-        dey
-        lda $61
-        sta (ptr1),y
-        rts
+;; store packed float in memory        
+;; in: dest. pointer (a/x), float in FAC        
+;__float_fac_to_float_packed:    ; UNUSED
+;        sta ptr1
+;        stx ptr1+1
+;        ldy #4
+;        lda FAC_MANTISSA3
+;        sta (ptr1),y
+;        dey
+;        lda FAC_MANTISSA2
+;        sta (ptr1),y
+;        dey
+;        lda FAC_MANTISSA1
+;        sta (ptr1),y
+;        dey
+;; use the MSB of the mantissa for the sign
+;        lda FAC_SIGN
+;        ora #$7f
+;        and FAC_MANTISSA0
+;        sta (ptr1),y
+;        dey
+;        lda FAC_EXPONENT
+;        sta (ptr1),y
+;        rts
         
+;; store packed float in memory        
+;; in: dest. pointer (a/x), float in ARG
 __float_arg_to_float_packed:
         sta ptr1
         stx ptr1+1
         ldy #4
-        lda $65+8
+        lda ARG_MANTISSA3
         sta (ptr1),y
         dey
-        lda $64+8
+        lda ARG_MANTISSA2
         sta (ptr1),y
         dey
-        lda $63+8
+        lda ARG_MANTISSA1
         sta (ptr1),y
         dey
-        lda #$66+8
+; use the MSB of the mantissa for the sign
+        lda ARG_SIGN
         ora #$7f
-        and $62+8
+        and ARG_MANTISSA0
         sta (ptr1),y
         dey
-        lda $61+8
+        lda ARG_EXPONENT
         sta (ptr1),y
         rts
         
@@ -412,7 +424,7 @@ __float_ret2:
 .macro __ffunc2a addr
         jsr ___float_float_to_fac_arg
         jsr __basicon
-        lda $61
+        lda FAC_EXPONENT
         jsr addr
         jmp __float_ret2
 .endmacro
@@ -481,9 +493,9 @@ __ftestsgn:
         jmp __float_ret3
         
 ___float_testsgn_fac:
-        lda $61
+        lda FAC_EXPONENT
         beq @s
-        lda $66
+        lda FAC_SIGN
         rol a
         lda #$ff
         bcs @s
@@ -492,9 +504,9 @@ ___float_testsgn_fac:
         rts
 
 ___float_testsgn_arg:
-        lda $69
+        lda ARG_EXPONENT
         beq @s
-        lda $6e
+        lda ARG_SIGN
         rol a
         lda #$ff
         bcs @s
@@ -538,51 +550,51 @@ __float_atn_fac:
         jmp __basicoff
 __float_div_fac_arg:
         jsr __basicon
-        lda $61
+        lda FAC_EXPONENT
         jsr BASIC_ARG_FAC_Div
         jmp __basicoff
 __float_add_fac_arg:
         jsr __basicon
-        lda $61
+        lda FAC_EXPONENT
         jsr BASIC_ARG_FAC_Add
         jmp __basicoff
         
 __float_swap_fac_arg:
-        lda   $61
-        ldx   $69
-        stx   $61
-        sta   $69
-        lda   $62
-        ldx   $6a
-        stx   $62
-        sta   $6a
-        lda   $63
-        ldx   $6b
-        stx   $63
-        sta   $6b
-        lda   $64
-        ldx   $6c
-        stx   $64
-        sta   $6c
-        lda   $65
-        ldx   $6d
-        stx   $65
-        sta   $6d
-        lda   $66
-        ldx   $6e
-        stx   $66
-        sta   $6e
+        lda   FAC_EXPONENT
+        ldx   ARG_EXPONENT
+        stx   FAC_EXPONENT
+        sta   ARG_EXPONENT
+        lda   FAC_MANTISSA0
+        ldx   ARG_MANTISSA0
+        stx   FAC_MANTISSA0
+        sta   ARG_MANTISSA0
+        lda   FAC_MANTISSA1
+        ldx   ARG_MANTISSA1
+        stx   FAC_MANTISSA1
+        sta   ARG_MANTISSA1
+        lda   FAC_MANTISSA2
+        ldx   ARG_MANTISSA2
+        stx   FAC_MANTISSA2
+        sta   ARG_MANTISSA2
+        lda   FAC_MANTISSA3
+        ldx   ARG_MANTISSA3
+        stx   FAC_MANTISSA3
+        sta   ARG_MANTISSA3
+        lda   FAC_SIGN
+        ldx   ARG_SIGN
+        stx   FAC_SIGN
+        sta   ARG_SIGN
         rts
         
         .export __fneg
 __fneg:
         jsr ___float_float_to_fac
 
-        lda $61       ; FAC Exponent
+        lda FAC_EXPONENT       ; FAC Exponent
         beq @sk
-        lda $66       ; FAC Sign
+        lda FAC_SIGN       ; FAC Sign
         eor #$FF
-        sta $66       ; FAC Sign
+        sta FAC_SIGN       ; FAC Sign
 @sk:
         jmp ___float_fac_to_float
         
@@ -633,7 +645,7 @@ __fatan2:
 @s21:
                         ; a= 0
                         lda #$00
-                        sta $62
+                        sta FAC_MANTISSA0
                         jmp __float_ret2
       ; fac <0
 @s22:

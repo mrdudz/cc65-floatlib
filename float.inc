@@ -1,4 +1,21 @@
 
+FAC_EXPONENT    = $61
+FAC_MANTISSA0   = $62
+FAC_MANTISSA1   = $63
+FAC_MANTISSA2   = $64
+FAC_MANTISSA3   = $65
+FAC_SIGN        = $66
+
+ARG_EXPONENT    = $69
+ARG_MANTISSA0   = $6a
+ARG_MANTISSA1   = $6b
+ARG_MANTISSA2   = $6c
+ARG_MANTISSA3   = $6d
+ARG_SIGN        = $6e
+
+FAC_SIGN_COMPARE = $6f
+FAC_ROUNDING     = $70
+
 ; addresses of the floating point routines in CBM BASIC V2
 
 ; the following are the addresses in the C64 ROM - the library can probably be
