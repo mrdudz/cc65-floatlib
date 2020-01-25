@@ -2,7 +2,7 @@
 # cc65 floating point lib
 ##############################################################################################
 
-all: runtime.lib floattest.prg
+all: runtime.lib floattest.prg floattest
 
 runtime.lib: float.s floatc.c float.inc
 	ca65 float.s -o float.o
@@ -14,6 +14,9 @@ floattest.prg: runtime.lib math.h float.h floattest.c
 #	cl65 -Osir floattest.c runtime.lib -o floattest.prg
 	cl65 floattest.c runtime.lib -o floattest.prg
 #	cc65 floattest.c -o floattest.s
+
+floattest: floattest.c math.h float.h
+	gcc -O2 -W -Wall -Wextra -o floattest -lm floattest.c
 
 clean:
 	$(RM) floattest.s

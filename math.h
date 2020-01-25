@@ -2,6 +2,7 @@
 #ifndef _MATH_H_
 #define _MATH_H_
 
+#ifdef __CC65__
 
 #include "float.h"
 
@@ -70,11 +71,39 @@ void _fpoly2(float *d,fpoly *a,float *x);
 /*
    todo:
 
-    acos,asin,ceil,cosh,floor,fmod,hypot,ldexp,log10,modf,poly,pow10,sinh
+    acos,asin,ceil,cosh,fmod,hypot,ldexp,log10,modf,poly,pow10,sinh
     tanh,cabs,_matherr,matherr,
 
 */
 
 float ffloor(float x);
+
+#else /* __CC65__ */
+
+/* some macros to allow testing of programs using the lib in 
+   a different compiler */
+
+#include <math.h>
+
+#define flog(a)     (log(a))
+#define fexp(a)     (exp(a))
+#define fsqr(a)     (sqrt(a))
+
+#define fsin(a)     (sin(a))
+#define fcos(a)     (cos(a))
+#define ftan(a)     (tan(a))
+#define fatn(a)     (atn(a))
+
+#define _f_2pi (M_PI * 2.0f)
+
+/* degrees to radiants */
+#define deg2rad(_fs, _n) (((_fs) / (_n)) * _f_2pi)
+/* radiants to degrees deg = (rad / (2 * pi)) * 256 */
+#define rad2deg(_rad, _n) (((_rad) / _f_2pi) * (_n))
+
+#define fsqrt(a)    (sqrt(a))
+#define ffloor(a)   (floor(a))
+
+#endif /* __CC65__ */
 
 #endif /* _MATH_H_ */

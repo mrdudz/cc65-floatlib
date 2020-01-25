@@ -2,6 +2,7 @@
 #ifndef _FLOAT_H_
 #define _FLOAT_H_
 
+#ifdef __CC65__
 /*
 
   format used in basic-variables
@@ -98,5 +99,52 @@ unsigned char __fastcall__ _ftestsgn(float f); /* fixme */
 
 /* resets fp-libs in Turbo-C and M$-C */
 #define _fpreset()
+
+#else /* __CC65__ */
+
+/* some macros to allow testing of programs using the lib in 
+   a different compiler */
+
+#include <math.h>
+
+#define fdiv(a,b)   ((a)/(b))
+#define fmul(a,b)   ((a)*(b))
+#define fadd(a,b)   ((a)+(b))
+#define fsub(a,b)   ((a)-(b))
+
+#define fcmpgt(a,b) ((a)>(b))
+#define fcmplt(a,b) ((a)<(b))
+#define fcmpeq(a,b) ((a)==(b))
+
+int fcmp(float a, float b)
+{
+    if (a > b) return 255;
+    if (a < b) return 1;
+    return 0;
+}
+
+#define _fand(a,b)  ((unsigned)(a) & (unsigned)(b))
+#define _for(a,b)   ((unsigned)(a) | (unsigned)(b))
+
+#define _fneg(a)    (-(a))
+#define fneg(a)     (-(a))
+
+#define _ctof(a)    ((float)(a))
+#define _utof(a)    ((float)(a))
+#define _stof(a)    ((float)(a))
+
+#define ctof(a)     ((float)(a))
+#define itof(a)     ((float)(a))
+#define ftoi(a)     ((int)(a))
+
+char* _ftostr(char *b, float a)
+{
+    sprintf(b, "%f", a);
+    return b;
+}
+
+#define ftoa(a, b)  _ftostr((a), (b))
+
+#endif /* __CC65__ */
 
 #endif /* _FLOAT_H_ */

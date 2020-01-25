@@ -1,5 +1,8 @@
 
+#ifdef __CC65__
 #include <conio.h>
+#endif
+
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,9 +12,9 @@
 
 #define time() clock()
 
-unsigned char strbuf[0x20];
-unsigned char strbuf2[0x20];
-unsigned char strbuf3[0x20];
+char strbuf[0x20];
+char strbuf2[0x20];
+char strbuf3[0x20];
 
 float fd, fs;
 float a, b, c1;
@@ -24,11 +27,6 @@ void csetpoint8(unsigned char x)
         printf(" ");
     }
     printf("*\n");
-}
-
-void cplot(unsigned char x, unsigned char y)
-{
-    gotoxy(x,y);cputc('*');
 }
 
 #define YNUM    32
@@ -55,6 +53,8 @@ void calccos(void)
     }
 }
 
+#ifdef __CC65__
+
 int fx, fy;
 
 #define CYNUM    20
@@ -63,6 +63,10 @@ int fx, fy;
 #define CXNUM    20
 #define CXNUM2   10
 
+void cplot(unsigned char x, unsigned char y)
+{
+    gotoxy(x,y);cputc('*');
+}
 
 void testatan2(void)
 {
@@ -79,6 +83,7 @@ void testatan2(void)
         cputs(strbuf);
    }
 }
+#endif
 
 #if 0
 void calcpoly1(void){
@@ -193,7 +198,7 @@ void testconversions(void)
     printf("a:%s b:%s c:%s\n",
            _ftostr(strbuf, itof(1234)),
            _ftostr(strbuf2, itof(5678)),
-           _ftostr(strbuf3, itof(9012)),
+           _ftostr(strbuf3, itof(9012))
           );
 }
 
@@ -256,9 +261,6 @@ void testcompare(void)
 
 int main(void)
 {
-    clrscr();
-    printf("Floattest\n");
-
 //    testconversions();
 //    testbasicmath();
 //    testlogical();
@@ -274,4 +276,5 @@ int main(void)
 #if 0
     calcpoly1();
 #endif
+    return EXIT_SUCCESS;
 }
