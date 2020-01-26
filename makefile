@@ -19,7 +19,7 @@ floattest: floattest.c math.h float.h
 	gcc -O2 -W -Wall -Wextra -o floattest -lm floattest.c
 
 clean:
-	$(RM) floattest.s
+	$(RM) floattest.s runtime.lib floatc.s floattest.prg floattest
 	$(RM) *~
 	$(RM) *.prg *.o *.map *.lbl *.log *.lst *.d64
 

@@ -3,6 +3,14 @@
 #define _FLOAT_H_
 
 #ifdef __CC65__
+
+#define BINARYFORMAT_CBM_UNPACKED  0
+#define BINARYFORMAT_CBM_PACKED    1
+#define BINARYFORMAT_IEEE754       2    // TODO
+
+// BEWARE: also change in float.s
+#define BINARYFORMAT BINARYFORMAT_CBM_PACKED   
+
 /*
 
   format used in basic-variables
@@ -103,7 +111,7 @@ unsigned char __fastcall__ _ftestsgn(float f); /* fixme */
 #else /* __CC65__ */
 
 /* some macros to allow testing of programs using the lib in 
-   a different compiler */
+   a different compiler (with float support) */
 
 #include <math.h>
 
@@ -126,8 +134,8 @@ int fcmp(float a, float b)
 #define _fand(a,b)  ((unsigned)(a) & (unsigned)(b))
 #define _for(a,b)   ((unsigned)(a) | (unsigned)(b))
 
-#define _fneg(a)    (-(a))
-#define fneg(a)     (-(a))
+#define _fneg(a)    (-(float)(a))
+#define fneg(a)     (-(float)(a))
 
 #define _ctof(a)    ((float)(a))
 #define _utof(a)    ((float)(a))

@@ -1,3 +1,12 @@
+
+BINARYFORMAT_CBM_UNPACKED   = 0
+BINARYFORMAT_CBM_PACKED     = 1
+BINARYFORMAT_IEEE755        = 2 ; TODO
+
+; BEWARE: also change in float.h
+;BINARYFORMAT = BINARYFORMAT_CBM_UNPACKED
+BINARYFORMAT = BINARYFORMAT_CBM_PACKED
+
         .segment "LOWCODE"
 
 ;---------------------------------------------------------------------------------------------
@@ -108,18 +117,42 @@ __float_str_to_fac:
 
 ; get C-parameter (float), convert to FAC        
 ___float_float_to_fac:
-        sta FAC_MANTISSA1
-        stx FAC_MANTISSA0
-        ldy sreg
-        sty FAC_EXPONENT
-        ldy sreg+1
-        sty FAC_SIGN
+.if BINARYFORMAT = BINARYFORMAT_CBM_UNPACKED
+        sta FAC_MANTISSA1   ; 3
+        stx FAC_MANTISSA0   ; 2
+        ldy sreg            ; 1
+        sty FAC_EXPONENT    
+        ldy sreg+1          ; 0
+        sty FAC_SIGN        
 
         ldx #$00
         stx FAC_MANTISSA2
         stx FAC_MANTISSA3
-
         stx FAC_ROUNDING
+.endif
+.if BINARYFORMAT = BINARYFORMAT_CBM_PACKED
+        sta FAC_MANTISSA2   ; 3
+        stx FAC_MANTISSA1   ; 2
+        lda sreg            ; 1
+        ora #$80
+        sta FAC_MANTISSA0   
+
+        ; bit7=0 sign=0
+        ; bit7=1 sign=$ff
+        ldx #0
+        lda sreg
+        bpl @pos
+        dex
+@pos:
+        stx FAC_SIGN
+
+        ldy sreg+1          ; 0
+        sty FAC_EXPONENT    
+
+        ldx #$00
+        stx FAC_MANTISSA3
+        stx FAC_ROUNDING
+.endif
         rts
         
 ; load BASIC float into FAC        
@@ -159,21 +192,49 @@ ___float_float_to_fac_arg:
 ___float_float_to_arg:
         ldy #$03
         jsr ldeaxysp
-        sta ARG_MANTISSA1
-        stx ARG_MANTISSA0
-        ldy sreg
+        
+.if BINARYFORMAT = BINARYFORMAT_CBM_UNPACKED
+        sta ARG_MANTISSA1   ; 3
+        stx ARG_MANTISSA0   ; 2
+        ldy sreg            ; 1
         sty ARG_EXPONENT
 
         ldx #$00
         stx ARG_MANTISSA2
         stx ARG_MANTISSA3
 
-        lda sreg+1
-
+        lda sreg+1          ; 0
         sta ARG_SIGN
         eor FAC_SIGN
         sta FAC_SIGN_COMPARE ; sign compare
+.endif
 
+.if BINARYFORMAT = BINARYFORMAT_CBM_PACKED
+        sta ARG_MANTISSA2   ; 3
+        stx ARG_MANTISSA1   ; 2
+        lda sreg            ; 1
+        ora #$80
+        sta ARG_MANTISSA0   
+        
+        ; bit7=0 sign=0
+        ; bit7=1 sign=$ff
+        ldx #0
+        lda sreg            ; 1
+        bpl @pos
+        dex
+@pos:
+        stx ARG_SIGN
+        
+        ldy sreg+1          ; 0
+        sty ARG_EXPONENT    
+
+        ldx #$00
+        stx ARG_MANTISSA3
+        
+        lda ARG_SIGN
+        eor FAC_SIGN
+        sta FAC_SIGN_COMPARE ; sign compare
+.endif        
         jmp incsp4
 
 ; load BASIC float into ARG
@@ -206,15 +267,27 @@ __float_float_to_arg:   ; only used in ATAN2?
         
 ; return to C, float as unsigned long
 ___float_fac_to_float:
-
-        ; return as LONG
+.if BINARYFORMAT = BINARYFORMAT_CBM_UNPACKED
         lda FAC_SIGN
-        sta sreg+1
-
+        sta sreg+1          ; 0
         lda FAC_EXPONENT
-        sta sreg
-        ldx FAC_MANTISSA0
-        lda FAC_MANTISSA1
+        sta sreg            ; 1
+        ldx FAC_MANTISSA0   ; 2
+        lda FAC_MANTISSA1   ; 3
+.endif        
+.if BINARYFORMAT = BINARYFORMAT_CBM_PACKED
+        lda FAC_EXPONENT
+        sta sreg+1          ; 0
+        
+        ; use the MSB of the mantissa for the sign
+        lda FAC_SIGN        ; either $ff or $00
+        ora #$7f            ; ->     $ff or $7f
+        and FAC_MANTISSA0   ; bit7 of mantissa is always 1
+        sta sreg            ; 1
+
+        ldx FAC_MANTISSA1   ; 2
+        lda FAC_MANTISSA2   ; 3
+.endif        
         rts        
 
 ;; store float in memory        
@@ -559,7 +632,7 @@ __float_add_fac_arg:
         jsr BASIC_ARG_FAC_Add
         jmp __basicoff
         
-__float_swap_fac_arg:
+__float_swap_fac_arg:           ; only used in ATAN2
         lda   FAC_EXPONENT
         ldx   ARG_EXPONENT
         stx   FAC_EXPONENT
@@ -590,11 +663,11 @@ __float_swap_fac_arg:
 __fneg:
         jsr ___float_float_to_fac
 
-        lda FAC_EXPONENT       ; FAC Exponent
+        lda FAC_EXPONENT
         beq @sk
-        lda FAC_SIGN       ; FAC Sign
+        lda FAC_SIGN
         eor #$FF
-        sta FAC_SIGN       ; FAC Sign
+        sta FAC_SIGN
 @sk:
         jmp ___float_fac_to_float
         

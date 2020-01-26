@@ -1,0 +1,5 @@
+*.o
+*.prg
+floattest
+floatc.s
+runtime.lib

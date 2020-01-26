@@ -12,3 +12,4 @@ TODO:
 - fix the polynom calculation functions
 - implement more missing functions
 - improve the tests
+- disable the BASIC errors somehow(?)

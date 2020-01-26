@@ -3,18 +3,37 @@
 #include <conio.h>
 #endif
 
-#include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include "float.h"
 #include "math.h"
 
-#define time() clock()
-
 char strbuf[0x20];
 char strbuf2[0x20];
 char strbuf3[0x20];
+
+
+typedef union {
+    float    f;
+    unsigned char b[sizeof (float)];
+} U;
+
+#ifdef __CC65__
+uint32_t ftobin(float f)
+#else
+unsigned long ftobin(float f)
+#endif
+{
+    U u;
+    u.f = f;
+#ifdef __CC65__
+    return ((uint32_t)u.b[0] << 0) | ((uint32_t)u.b[1] << 8) | ((uint32_t)u.b[2] << 16) | ((uint32_t)u.b[3] << 24);
+#else
+    return ((uint32_t)u.b[3] << 0) | ((uint32_t)u.b[2] << 8) | ((uint32_t)u.b[1] << 16) | ((uint32_t)u.b[0] << 24);
+#endif
+}
 
 float fd, fs;
 float a, b, c1;
@@ -127,7 +146,7 @@ unsigned short var_co;
 
 void f1(void)
 {
-    printf("i:%08lx\n",_ctof(0));
+    printf("i:0x%08lx\n",ftobin(_ctof(0)));
 
 #if 0
     printf("exp mantissa sign\n");
@@ -164,30 +183,40 @@ void f1(void)
     };
 }
 
+
+void testbinary(void)
+{
+    
+    n= 5;b=itof(n);printf("%d:0x%08lx\n", n, ftobin(b));
+    n=-5;b=itof(n);printf("%d:0x%08lx\n", n, ftobin(b));
+    n= 2;b=itof(n);printf("%d:0x%08lx\n", n, ftobin(b));
+    n= 3;b=itof(n);printf("%d:0x%08lx\n", n, ftobin(b));
+}
+
 void testconversions(void)
 {
     b=ctof(42);
-    printf("b:%08lx\n", b);
+    printf("b:0x%08lx\n", ftobin(b));
     n=ftoi(b);
     printf("n:%d\n", n);
 
     b=_utof(42);
-    printf("b:%08lx\n", b);
+    printf("b:0x%08lx\n", ftobin(b));
     n=ftoi(b);
     printf("n:%d\n", n);
 
     b=_stof(1234);
-    printf("b:%08lx\n", b);
+    printf("b:0x%08lx\n", ftobin(b));
     n=ftoi(b);
     printf("n:%d\n", n);
 
     b=itof(1234);
-    printf("b:%08lx\n", b);
+    printf("b:0x%08lx\n", ftobin(b));
     n=ftoi(b);
     printf("n:%d\n", n);
     
     b=atof("1234");
-    printf("b:%08lx\n", b);
+    printf("b:0x%08lx\n", ftobin(b));
     n=ftoi(b);
     printf("n:%d\n", n);
     ftoa(strbuf, b);
@@ -208,18 +237,33 @@ void testbasicmath(void)
     fd=itof((int)t); 
     fs=_fneg(fd);
     _ftostr(strbuf,fd);    
-    printf("fd:%s\n",strbuf);
+    printf("123:%s\n",strbuf);
     _ftostr(strbuf,fs);    
-    printf("fs:%s\n",strbuf);
+    printf("-123:%s\n",strbuf);
     
     a = itof(4321);
     b = itof(1234);
-    printf("a:%08lx\n", a);
-    printf("b:%08lx\n", b);
+    printf("4321:0x%08lx\n", ftobin(a));
+    printf("1234:0x%08lx\n", ftobin(b));
     c1 = fadd(a, b);
-    printf("c1:%08lx\n", c1);
+    printf("4321+1234:0x%08lx\n", ftobin(c1));
     ftoa(strbuf, c1);
-    printf("c1:%s\n", strbuf);
+    printf("4321+1234:%s\n", strbuf);
+    
+    a = itof(1111);
+    b = itof(2222);
+    printf("1111:0x%08lx\n", ftobin(a));
+    printf("2222:0x%08lx\n", ftobin(b));
+    c1 = fsub(a, b);
+    printf("1111-2222:0x%08lx\n", ftobin(c1));
+    ftoa(strbuf, c1);
+    printf("1111-2222:%s\n", strbuf);
+
+    fd=itof((int)t); 
+    fs=itof((int)2); 
+    fd=fdiv(fd,fs);
+    _ftostr(strbuf,fd);    
+    printf("t:%s\n",strbuf);
     
     // 1234 / 60 = 20,5666...
     t=1234;
@@ -242,10 +286,10 @@ void testlogical(void)
 {
     a = itof(0xffa5);
     b = itof(0x5aff);
-    printf("a:%08lx\n", a);
-    printf("b:%08lx\n", b);
+    printf("a:0x%08lx\n", ftobin(a));
+    printf("b:0x%08lx\n", ftobin(b));
     c1 = _fand(a, b);
-    printf("c1:%08lx\n", c1);
+    printf("c1:0x%08lx\n", ftobin(c1));
     n=ftoi(c1);
     printf("c1:%04x\n", n);
 }
@@ -261,9 +305,11 @@ void testcompare(void)
 
 int main(void)
 {
+    printf("sizeof (float): %d\n", (int)sizeof(float));
 //    testconversions();
-//    testbasicmath();
+    testbasicmath();
 //    testlogical();
+    testbinary();
     testcompare();
     
 #if 0    

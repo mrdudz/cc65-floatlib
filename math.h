@@ -31,8 +31,14 @@ float __fastcall__ _fint(float s);
 #define fatn(_s) _fatn((_s))
 
 /* some float constants */
+#if BINARYFORMAT == BINARYFORMAT_CBM_UNPACKED   
 #define _f_2pi  0x0083c90f
 #define _f_pi   0x0082c90f
+#endif
+#if BINARYFORMAT == BINARYFORMAT_CBM_PACKED   
+#define _f_2pi  0x83490fda
+#define _f_pi   0x82490fda
+#endif
 
 #define M_PI    _f_pi
 
@@ -85,24 +91,24 @@ float ffloor(float x);
 
 #include <math.h>
 
-#define flog(a)     (log(a))
-#define fexp(a)     (exp(a))
-#define fsqr(a)     (sqrt(a))
+#define flog(a)     (logf(a))
+#define fexp(a)     (expf(a))
+#define fsqr(a)     (sqrtf(a))
 
-#define fsin(a)     (sin(a))
-#define fcos(a)     (cos(a))
-#define ftan(a)     (tan(a))
-#define fatn(a)     (atn(a))
+#define fsin(a)     (sinf(a))
+#define fcos(a)     (cosf(a))
+#define ftan(a)     (tanf(a))
+#define fatn(a)     (atnf(a))
 
-#define _f_2pi (M_PI * 2.0f)
+#define _f_2pi      ((float)(M_PI * 2.0f))
 
 /* degrees to radiants */
 #define deg2rad(_fs, _n) (((_fs) / (_n)) * _f_2pi)
 /* radiants to degrees deg = (rad / (2 * pi)) * 256 */
 #define rad2deg(_rad, _n) (((_rad) / _f_2pi) * (_n))
 
-#define fsqrt(a)    (sqrt(a))
-#define ffloor(a)   (floor(a))
+#define fsqrt(a)    (sqrtf(a))
+#define ffloor(a)   (floorf(a))
 
 #endif /* __CC65__ */
 
