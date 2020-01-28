@@ -58,7 +58,7 @@ float __fastcall__ _fpow(float f, float a);
 
 float __fastcall__ _fneg(float f);
 
-/* string convertion routines */
+/* string convertion routines, these use the exponential form */
 char * __fastcall__ _ftostr(char *d, float s); /* for vsprintf */
 float __fastcall__ _strtof(char *d);
 
@@ -74,10 +74,12 @@ unsigned char __fastcall__ _ftestsgn(float f); /* fixme */
 
 #define ctof(_s) _ctof((_s))
 #define itof(_s) _itof((_s))
+#define ltof(_s) _itof((_s))    /* TODO */
 #define ftoi(_s) _ftoi((_s))
+#define ftol(_s) _ftoi((_s))    /* TODO */
 
 #define atof(_s)        _strtof((_s))
-#define ftoa(_s, _f)    _ftostr((_s), (_f))
+char *ftoa(char *buf, float n);
 
 #define fneg(_s)        _fneg((_s))
 
@@ -119,6 +121,7 @@ unsigned char __fastcall__ _ftestsgn(float f); /* fixme */
 #define fmul(a,b)   ((a)*(b))
 #define fadd(a,b)   ((a)+(b))
 #define fsub(a,b)   ((a)-(b))
+#define fpow(a,b)   powf((a),(b))
 
 #define fcmpgt(a,b) ((a)>(b))
 #define fcmplt(a,b) ((a)<(b))

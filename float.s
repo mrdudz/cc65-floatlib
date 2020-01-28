@@ -93,6 +93,7 @@ __float_fac_to_u16:
 ; converter float to string and back
 ;---------------------------------------------------------------------------------------------
 
+; this converts to exponential form, ie what %e in printf would give you
 __float_fac_to_str:
         jsr __basicon
         jsr BASIC_FAC_to_string
