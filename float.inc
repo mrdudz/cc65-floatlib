@@ -53,7 +53,7 @@ BASIC_FAC_to_u16    = $bc9b     ; in:FAC out: y/a:lo/hi value
 BASIC_string_to_FAC = $b7b5     ; in: $22/$23 ptr to str,a=strlen out: FAC value
 BASIC_FAC_to_string = $bddd     ; in: FAC value   out: str at $0100 a/y ptr to str
 
-BASIC_LoadARG       = $babc     ; a/y:lo/hi ptr to 5-byte float
+BASIC_LoadARG       = $ba8c     ; a/y:lo/hi ptr to 5-byte float
 BASIC_LoadFAC       = $bba2     ; a/y:lo/hi ptr to 5-byte float
 
 BASIC_FAC_testsgn   = $bc2b     ; in: FAC(x1) out: a=0 (x1=0) a=1 (x1>0) a=255 (x1<0)
