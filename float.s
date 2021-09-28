@@ -32,6 +32,12 @@ __basicoff:
   .endif
 .endmacro
 
+.macro __disable_basic_if_needed
+  .if .defined(__C64__)
+        jsr __basicoff
+  .endif
+.endmacro
+
 .macro __return_with_cleanup
   .if .defined(__C64__)
         jmp __basicoff
@@ -106,7 +112,7 @@ __float_u16_to_fac:
 __float_fac_to_u16:
         __enable_basic_if_needed
         jsr BASIC_FAC_to_u16
-        jsr __basicoff
+        __disable_basic_if_needed
         ldx FAC_MANTISSA2
         lda FAC_MANTISSA3
         rts
@@ -482,7 +488,7 @@ __strtof:
         jsr ___float_float_to_fac
         __enable_basic_if_needed
         jsr addr
-        jsr __basicoff
+        __disable_basic_if_needed
         jmp ___float_fac_to_float
 .endmacro
 
