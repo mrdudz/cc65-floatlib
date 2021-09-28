@@ -11,15 +11,14 @@ BINARYFORMAT = BINARYFORMAT_CBM_PACKED
 
 ;---------------------------------------------------------------------------------------------
 
-__basicon:
 .if .defined(__C64__)
+__basicon:
         sei
         ldx #$37
         stx $01
         rts
-.endif
+
 __basicoff:
-.if .defined(__C64__)
         ldx #$36
         stx $01
         cli
