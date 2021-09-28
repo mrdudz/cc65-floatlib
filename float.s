@@ -518,9 +518,11 @@ __fround:  __ffunc1 BASIC_FAC_Round
 __float_ret2:
 
         ;jsr __basicoff
+.if .defined(__C64__)
         ldx #$36
-        ;stx $01
-        ;cli
+        stx $01
+        cli
+.endif
         jmp ___float_fac_to_float    ; also pops pointer to float
 
 .macro __ffunc2a addr
