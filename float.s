@@ -11,23 +11,50 @@ BINARYFORMAT = BINARYFORMAT_CBM_PACKED
 
 ;---------------------------------------------------------------------------------------------
 
+.if .defined(__C64__)
 __basicon:
         sei
         ldx #$37
         stx $01
         rts
+
 __basicoff:
         ldx #$36
         stx $01
         cli
         rts
+.endif
+
+.macro __enable_basic_if_needed
+  .if .defined(__C64__)
+        jsr __basicon
+  .endif
+.endmacro
+
+.macro __disable_basic_if_needed
+  .if .defined(__C64__)
+        jsr __basicoff
+  .endif
+.endmacro
+
+.macro __return_with_cleanup
+  .if .defined(__C64__)
+        jmp __basicoff
+  .else
+        rts
+  .endif
+.endmacro
 
 ;---------------------------------------------------------------------------------------------
 ; first come the actual stubs to floating point routines, these are ment to be
 ; used from further written ml-math routines aswell. (maybe also from the compiler?!)
 ;---------------------------------------------------------------------------------------------
 
-        .include  "float.inc"
+.if .defined(__VIC20__)
+        .include "float-vic20.inc"
+.else
+        .include "float.inc"
+.endif
         
         .importzp sreg, ptr1
 
@@ -38,18 +65,18 @@ __basicoff:
 ___float_s8_to_fac:
         ;a: low
 __float_s8_to_fac:
-        jsr __basicon
+        __enable_basic_if_needed
         jsr BASIC_s8_to_FAC
-        jmp __basicoff
+        __return_with_cleanup
 
 ___float_u8_to_fac:
         ;a: low
         tay
         ;y: low
 __float_u8_to_fac:
-        jsr __basicon
+        __enable_basic_if_needed
         jsr BASIC_u8_to_FAC
-        jmp __basicoff
+        __return_with_cleanup
         
 ; get C-parameter (signed int), convert to FAC
 ___float_s16_to_fac:
@@ -60,9 +87,9 @@ ___float_s16_to_fac:
         
 ; convert signed int (YA) to FAC
 __float_s16_to_fac:
-        jsr __basicon           ; enable BASIC (trashes X)
+        __enable_basic_if_needed           ; enable BASIC (trashes X)
         jsr BASIC_s16_to_FAC
-        jmp __basicoff
+        __return_with_cleanup
        
 ; get C-parameter (unsigned short), convert to FAC          
 ___float_u16_to_fac:
@@ -74,17 +101,17 @@ ___float_u16_to_fac:
 __float_u16_to_fac:
         sta FAC_MANTISSA0
         sty FAC_MANTISSA1
-        jsr __basicon
+        __enable_basic_if_needed
         ldx #$90
         sec
         jsr BASIC_u16_to_FAC
-        jmp __basicoff
+        __return_with_cleanup
 
 ; return to C, FAC as unsigned int
 __float_fac_to_u16:
-        jsr __basicon
+        __enable_basic_if_needed
         jsr BASIC_FAC_to_u16
-        jsr __basicoff
+        __disable_basic_if_needed
         ldx FAC_MANTISSA2
         lda FAC_MANTISSA3
         rts
@@ -95,9 +122,9 @@ __float_fac_to_u16:
 
 ; this converts to exponential form, ie what %e in printf would give you
 __float_fac_to_str:
-        jsr __basicon
+        __enable_basic_if_needed
         jsr BASIC_FAC_to_string
-        jmp __basicoff
+        __return_with_cleanup
 
 ___float_str_to_fac:
 ;        jsr popax
@@ -110,9 +137,9 @@ __float_str_to_fac:
         iny
         bne @l
 @s:     tya
-        jsr __basicon
+        __enable_basic_if_needed
         jsr BASIC_string_to_FAC
-        jmp __basicoff
+        __return_with_cleanup
 
 ;---------------------------------------------------------------------------------------------
 
@@ -458,9 +485,9 @@ __strtof:
 
 .macro __ffunc1 addr
         jsr ___float_float_to_fac
-        jsr __basicon
+        __enable_basic_if_needed
         jsr addr
-        jsr __basicoff
+        __disable_basic_if_needed
         jmp ___float_fac_to_float
 .endmacro
 
@@ -490,14 +517,16 @@ __fround:  __ffunc1 BASIC_FAC_Round
 __float_ret2:
 
         ;jsr __basicoff
+.if .defined(__C64__)
         ldx #$36
         stx $01
         cli
+.endif
         jmp ___float_fac_to_float    ; also pops pointer to float
 
 .macro __ffunc2a addr
         jsr ___float_float_to_fac_arg
-        jsr __basicon
+        __enable_basic_if_needed
         lda FAC_EXPONENT
         jsr addr
         jmp __float_ret2
@@ -505,7 +534,7 @@ __float_ret2:
 
 .macro __ffunc2b addr
         jsr ___float_float_to_fac_arg
-        jsr __basicon
+        __enable_basic_if_needed
         jsr addr
         jmp __float_ret2
 .endmacro
@@ -527,9 +556,11 @@ __for:    __ffunc2b BASIC_ARG_FAC_Or
         
 __float_ret3:
         ;jsr __basicoff
+.if .defined(__C64__)
         ldx #$36
         stx $01
         cli
+.endif
         ldx #0
         rts  
         
@@ -550,7 +581,7 @@ __fcmp:
         lda #<tempfloat
         ldy #>tempfloat
 ___float_cmp_fac_arg:
-        jsr __basicon
+        __enable_basic_if_needed
         ; in: FAC=(x1) a/y= ptr lo/hi to x2
         jsr BASIC_FAC_cmp
         ; a=0 (==) / a=1 (>) / a=255 (<)
@@ -561,7 +592,7 @@ ___float_cmp_fac_arg:
 __ftestsgn:
         jsr ___float_float_to_fac
 ;___float_testsgn_fac:
-        jsr __basicon
+        __enable_basic_if_needed
         ; in: FAC(x1)
         jsr BASIC_FAC_testsgn
         jmp __float_ret3
@@ -598,7 +629,7 @@ __fpoly1:
         jsr popax
         tay
         txa
-        jsr __basicon
+        __enable_basic_if_needed
         jsr BASIC_FAC_Poly1
         jmp __float_ret2
 
@@ -612,26 +643,26 @@ __fpoly2:
         jsr popax
         tay
         txa
-        jsr __basicon
+        __enable_basic_if_needed
         jsr BASIC_FAC_Poly1
         jmp __float_ret2
         
 ;---------------------------------------------------------------------------------------------
         
 __float_atn_fac:
-        jsr __basicon
+        __enable_basic_if_needed
         jsr BASIC_FAC_Atn
-        jmp __basicoff
+        __return_with_cleanup
 __float_div_fac_arg:
-        jsr __basicon
+        __enable_basic_if_needed
         lda FAC_EXPONENT
         jsr BASIC_ARG_FAC_Div
-        jmp __basicoff
+        __return_with_cleanup
 __float_add_fac_arg:
-        jsr __basicon
+        __enable_basic_if_needed
         lda FAC_EXPONENT
         jsr BASIC_ARG_FAC_Add
-        jmp __basicoff
+        __return_with_cleanup
         
 __float_swap_fac_arg:           ; only used in ATAN2
         lda   FAC_EXPONENT
