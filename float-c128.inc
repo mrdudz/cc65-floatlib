@@ -20,14 +20,15 @@ FAC_ROUNDING     = $70
 ; the following are the addresses in the C64 ROM - the library can probably be
 ; used with other CBM targets just by adjusting these addresses
 
+; Mapping the C128 p224
 BASIC_FAC_Not       = $aed4     ; in/out: FAC
-BASIC_FAC_Cos       = $af3f     ; in/out: FAC
-BASIC_FAC_Sin       = $af42     ; in/out: FAC
-BASIC_FAC_Tan       = $af45     ; in/out: FAC
-BASIC_FAC_Atn       = $af48     ; in/out: FAC
+BASIC_FAC_Cos       = $9409     ; in/out: FAC
+BASIC_FAC_Sin       = $9410     ; in/out: FAC
+BASIC_FAC_Tan       = $9459     ; in/out: FAC
+BASIC_FAC_Atn       = $94b3     ; in/out: FAC
 BASIC_FAC_Rnd       = $e097     ; in/out: FAC
 BASIC_FAC_Int       = $af00     ; in/out: FAC
-BASIC_FAC_Sqr       = $bf71     ; in/out: FAC
+BASIC_FAC_Sqr       = $2fb7     ; in/out: FAC
 BASIC_FAC_Exp       = $af3c     ; in/out: FAC
 BASIC_FAC_Log       = $b9ea     ; in/out: FAC
 BASIC_FAC_Round     = $af4b     ; in/out: FAC
