@@ -22,16 +22,16 @@ FAC_ROUNDING     = $70
 
 ; Mapping the C128 p224
 BASIC_FAC_Not       = $aed4     ; in/out: FAC
-BASIC_FAC_Cos       = $9409     ; in/out: FAC
-BASIC_FAC_Sin       = $9410     ; in/out: FAC
-BASIC_FAC_Tan       = $9459     ; in/out: FAC
-BASIC_FAC_Atn       = $94b3     ; in/out: FAC
-BASIC_FAC_Rnd       = $e097     ; in/out: FAC
-BASIC_FAC_Int       = $af00     ; in/out: FAC
-BASIC_FAC_Sqr       = $2fb7     ; in/out: FAC
-BASIC_FAC_Exp       = $af3c     ; in/out: FAC
-BASIC_FAC_Log       = $b9ea     ; in/out: FAC
-BASIC_FAC_Round     = $af4b     ; in/out: FAC
+BASIC_FAC_Cos       = $9409     ; in/out: FAC updated
+BASIC_FAC_Sin       = $9410     ; in/out: FAC updated
+BASIC_FAC_Tan       = $9459     ; in/out: FAC updated
+BASIC_FAC_Atn       = $94b3     ; in/out: FAC updated
+BASIC_FAC_Rnd       = $8434     ; in/out: FAC updated
+BASIC_FAC_Int       = $af00     ; in/out: FAC ??
+BASIC_FAC_Sqr       = $8fb7     ; in/out: FAC updated
+BASIC_FAC_Exp       = $9033     ; in/out: FAC updated
+BASIC_FAC_Log       = $89ca     ; in/out: FAC updated
+BASIC_FAC_Round     = $8c47     ; in/out: FAC updated
 BASIC_FAC_Sgn       = $af51     ; in/out: FAC
 BASIC_FAC_Abs       = $bc58     ; in/out: FAC
 
