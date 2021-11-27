@@ -27,13 +27,13 @@ BASIC_FAC_Sin       = $9410     ; in/out: FAC updated
 BASIC_FAC_Tan       = $9459     ; in/out: FAC updated
 BASIC_FAC_Atn       = $94b3     ; in/out: FAC updated
 BASIC_FAC_Rnd       = $8434     ; in/out: FAC updated
-BASIC_FAC_Int       = $af00     ; in/out: FAC ??
+BASIC_FAC_Int       = $8cfb     ; in/out: FAC updated
 BASIC_FAC_Sqr       = $8fb7     ; in/out: FAC updated
 BASIC_FAC_Exp       = $9033     ; in/out: FAC updated
 BASIC_FAC_Log       = $89ca     ; in/out: FAC updated
 BASIC_FAC_Round     = $8c47     ; in/out: FAC updated
-BASIC_FAC_Sgn       = $af51     ; in/out: FAC
-BASIC_FAC_Abs       = $bc58     ; in/out: FAC
+BASIC_FAC_Sgn       = $8c65     ; in/out: FAC updated
+BASIC_FAC_Abs       = $8c84     ; in/out: FAC updated
 
 BASIC_ARG_FAC_Or    = $afe6     ; in: ARG,FAC out:FAC
 BASIC_ARG_FAC_And   = $afe9     ; in: ARG,FAC out:FAC
