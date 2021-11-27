@@ -20,8 +20,9 @@ FAC_ROUNDING     = $70
 ; the following are the addresses in the C64 ROM - the library can probably be
 ; used with other CBM targets just by adjusting these addresses
 
-; Mapping the C128 p224
-BASIC_FAC_Not       = $aed4     ; in/out: FAC
+; Mapping the C128 p224 / Programmers 522 (but the jump table
+; value at the given location)
+BASIC_FAC_Not       = $8ffa     ; in/out: FAC updated (negates sign routine, but NOT appears to be two's complement in BASIC)
 BASIC_FAC_Cos       = $9409     ; in/out: FAC updated
 BASIC_FAC_Sin       = $9410     ; in/out: FAC updated
 BASIC_FAC_Tan       = $9459     ; in/out: FAC updated
@@ -37,11 +38,11 @@ BASIC_FAC_Abs       = $8c84     ; in/out: FAC updated
 
 BASIC_ARG_FAC_Or    = $afe6     ; in: ARG,FAC out:FAC
 BASIC_ARG_FAC_And   = $afe9     ; in: ARG,FAC out:FAC
-BASIC_ARG_FAC_Sub   = $b853     ; in: ARG,FAC out:FAC
-BASIC_ARG_FAC_Add   = $b86a     ; in: ARG,FAC out:FAC
-BASIC_ARG_FAC_Mul   = $ba2b     ; in: ARG,FAC out:FAC
-BASIC_ARG_FAC_Div   = $bb12     ; in: ARG,FAC out:FAC
-BASIC_ARG_FAC_Pow   = $bf7b     ; in: ARG,FAC out:FAC
+BASIC_ARG_FAC_Sub   = $8831     ; in: ARG,FAC out:FAC updated
+BASIC_ARG_FAC_Add   = $8848     ; in: ARG,FAC out:FAC updated
+BASIC_ARG_FAC_Mul   = $8a27     ; in: ARG,FAC out:FAC updated
+BASIC_ARG_FAC_Div   = $8b4c     ; in: ARG,FAC out:FAC updated
+BASIC_ARG_FAC_Pow   = $8fc1     ; in: ARG,FAC out:FAC updated
 
 BASIC_u8_to_FAC     = $b3a2     ; y: value
 BASIC_s8_to_FAC     = $bc3c     ; a: value
