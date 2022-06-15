@@ -181,44 +181,60 @@ void f1(void)
         var_i=fadd(var_i,0x00818000);
 //        var_i=_fadd(var_i,_ctof(1));
     };
+#ifdef __CC65__
+    cgetc();
+#endif
 }
 
 
 void testbinary(void)
 {
-    
+    printf("\ntestbinary:\n\n");
     n= 5;b=itof(n);printf("%d:0x%08lx\n", n, ftobin(b));
     n=-5;b=itof(n);printf("%d:0x%08lx\n", n, ftobin(b));
     n= 2;b=itof(n);printf("%d:0x%08lx\n", n, ftobin(b));
     n= 3;b=itof(n);printf("%d:0x%08lx\n", n, ftobin(b));
+#ifdef __CC65__
+    cgetc();
+#endif
 }
 
 void testconversions(void)
 {
+    printf("\ntestconversions:\n\n");
+    printf("ftobin(0x12345678):0x%08lx\n", ftobin((float)0x12345678));
+
+    /* 42 ieee754: 0x42280000 */
     b=ctof(42);
-    printf("b:0x%08lx\n", ftobin(b));
+    printf("b:0x%08lx  ", ftobin(b));
+    n=ftoi((float)0x42280000);
+    printf("n:%d\n", n);
+
+    b=ctof(42);
+    printf("b:0x%08lx  ", ftobin(b));
     n=ftoi(b);
     printf("n:%d\n", n);
 
     b=_utof(42);
-    printf("b:0x%08lx\n", ftobin(b));
+    printf("b:0x%08lx  ", ftobin(b));
     n=ftoi(b);
     printf("n:%d\n", n);
 
     b=_stof(1234);
-    printf("b:0x%08lx\n", ftobin(b));
+    printf("b:0x%08lx  ", ftobin(b));
     n=ftoi(b);
     printf("n:%d\n", n);
 
     b=itof(1234);
-    printf("b:0x%08lx\n", ftobin(b));
+    printf("b:0x%08lx  ", ftobin(b));
     n=ftoi(b);
     printf("n:%d\n", n);
     
     b=atof("1234");
-    printf("b:0x%08lx\n", ftobin(b));
+    printf("b:0x%08lx  ", ftobin(b));
     n=ftoi(b);
     printf("n:%d\n", n);
+
     ftoa(strbuf, b);
     printf("s:%s\n", strbuf);
 
@@ -229,10 +245,14 @@ void testconversions(void)
            _ftostr(strbuf2, itof(5678)),
            _ftostr(strbuf3, itof(9012))
           );
+#ifdef __CC65__
+    cgetc();
+#endif
 }
 
 void testbasicmath(void)
 {
+    printf("\ntestbasicmath:\n\n");
     t=123;
     fd=itof((int)t); 
     fs=_fneg(fd);
@@ -285,32 +305,44 @@ void testbasicmath(void)
     b = fpow(a,itof(1)); printf("0x%08lx %s\n", ftobin(b), ftoa(strbuf,b));
     b = fpow(a,itof(2)); printf("0x%08lx %s\n", ftobin(b), ftoa(strbuf,b));
     b = fpow(a,itof(3)); printf("0x%08lx %s\n", ftobin(b), ftoa(strbuf,b));
+#ifdef __CC65__
+    cgetc();
+#endif
 }
 
 void testlogical(void)
 {
+    printf("\ntestlogical:\n\n");
     a = itof(0xffa5);
     b = itof(0x5aff);
-    printf("a:0x%08lx\n", ftobin(a));
-    printf("b:0x%08lx\n", ftobin(b));
+    printf("a:0x%08lx (0xffa5)\n", ftobin(a));
+    printf("b:0x%08lx (0x5aff)\n", ftobin(b));
     c1 = _fand(a, b);
     printf("c1:0x%08lx\n", ftobin(c1));
     n=ftoi(c1);
     printf("c1:%04x\n", n);
+#ifdef __CC65__
+    cgetc();
+#endif
 }
 
 void testcompare(void)
 {
+    printf("\ntestcompare:\n\n");
     a=itof(2);
     b=itof(3);
     printf("cmp 2,3: %3d %d %d %d\n", fcmp(a, b), fcmpgt(a, b), fcmpeq(a, b), fcmplt(a, b));
     printf("cmp 3,2: %3d %d %d %d\n", fcmp(b, a), fcmpgt(b, a), fcmpeq(b, a), fcmplt(b, a));
     printf("cmp 2,2: %3d %d %d %d\n", fcmp(a, a), fcmpgt(a, a), fcmpeq(a, a), fcmplt(a, a));
+#ifdef __CC65__
+    cgetc();
+#endif
 }
 
 
 void testprinting(void)
 {
+    printf("\ntestprinting:\n\n");
     a = itof(1);
     b = fdiv(a,itof(10)); printf("0x%08lx %s %s\n", ftobin(b), _ftostr(strbuf, b), ftoa(strbuf2, b));
     b = fdiv(a,itof(100)); printf("0x%08lx %s %s\n", ftobin(b), _ftostr(strbuf, b), ftoa(strbuf2, b));
@@ -340,16 +372,19 @@ void testprinting(void)
     b = fmul(a,itof(100)); printf("0x%08lx %s %s\n", ftobin(b), _ftostr(strbuf, b), ftoa(strbuf2, b));
     b = fmul(a,itof(1000)); printf("0x%08lx %s %s\n", ftobin(b), _ftostr(strbuf, b), ftoa(strbuf2, b));
     b = fmul(a,itof(10000)); printf("0x%08lx %s %s\n", ftobin(b), _ftostr(strbuf, b), ftoa(strbuf2, b));
+#ifdef __CC65__
+    cgetc();
+#endif
 }
 
 int main(void)
 {
     printf("sizeof (float): %d\n", (int)sizeof(float));
-//    testconversions();
-//    testbasicmath();
-//    testlogical();
-//    testbinary();
-//    testcompare();
+    testconversions();
+    testbasicmath();
+    testlogical();
+    testbinary();
+    testcompare();
     testprinting();
 #if 0    
     f1();

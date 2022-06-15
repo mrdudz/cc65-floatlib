@@ -6,10 +6,10 @@
 
 #define BINARYFORMAT_CBM_UNPACKED  0
 #define BINARYFORMAT_CBM_PACKED    1
-#define BINARYFORMAT_IEEE754       2    // TODO
+#define BINARYFORMAT_IEEE754       2
 
 // BEWARE: also change in float.s
-#define BINARYFORMAT BINARYFORMAT_CBM_PACKED   
+#define BINARYFORMAT BINARYFORMAT_IEEE754
 
 /*
 
@@ -19,23 +19,68 @@
   removes the need of constantly converting between both formats. (someday
   we may use an entire different (not cbm-specific), more accurate, format anyway)
 
+              sign
+    exponent / /mantissa
+    33333333 3 3222222222111111111110000000000
+    98765432 1 0987654321098765432109876543210
+
+ * The exponent can be computed from bits 39-32 by subtracting 129 (!)
  */
 typedef struct {
     unsigned char exponent;
     unsigned char mantissa[4];
 } FLOATBAS;
-/*
 
-  format used in floating-point akku
-
-  this format can be directly used with most basic routines
-
+/* CBM format used in floating-point akku
+ *
+ * this format can be directly used with most CBM BASIC routines
+ *
+ *  exponent mantissa                         sign
+ *  44444444 33333333332222222222111111111100 00000000
+ *  76543210 98765432109876543210987654321098 76543210
+ *
+ * truncated to 32bit:
+ *
+ *  exponent mantissa         sign
+ *  33222222 2222111111111100 00000000
+ *  10987654 3210987654321098 76543210
+ *
+ * The exponent can be computed from bits 47-40 by subtracting 129 (!) (130 = 2^1)
+ * MSB of the Mantissa must always be 1, if it is 0 the value is 0
+ * 
+ * 1.0 = exp=129, mantissa=$80
+ *
  */
 typedef struct {
     unsigned char exponent;
     unsigned char mantissa[4];
     unsigned char sign;
 } FLOATFAC;
+
+/* ieee754 32bit format:
+ * 
+ *  sign
+ * / /exponent/mantissa
+ * 3 32222222 22211111111110000000000
+ * 1 09876543 21098765432109876543210
+ * 
+ * The sign is stored in bit 31.
+ * The exponent can be computed from bits 23-30 by subtracting 127. (128 = 2^1)
+ * The mantissa is stored in bits 0-22.
+ *   An invisible leading bit (i.e. it is not actually stored) with value 1.0
+ *   is placed in front, then bit 23 has a value of 1/2, bit 22 has value 1/4 etc.
+ *   As a result, the mantissa has a value between 1.0 and 2.
+ *
+ * 1.0 = exp=127, mantissa=0
+ *
+ * If the exponent reaches -127 (binary 00000000), the leading 1 is no longer
+ * used to enable gradual underflow.
+ *
+ */
+typedef struct {
+    unsigned char exponent;     // msb is the sign
+    unsigned char mantissa[3];  // msb is lsb of exponent
+} FLOAT754;
 
 #define float unsigned long 
 /* we dont wanna seriously use double precision eh? ;=P */

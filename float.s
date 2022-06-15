@@ -1,11 +1,12 @@
 
 BINARYFORMAT_CBM_UNPACKED   = 0
 BINARYFORMAT_CBM_PACKED     = 1
-BINARYFORMAT_IEEE755        = 2 ; TODO
+BINARYFORMAT_IEEE754        = 2
 
 ; BEWARE: also change in float.h
 ;BINARYFORMAT = BINARYFORMAT_CBM_UNPACKED
-BINARYFORMAT = BINARYFORMAT_CBM_PACKED
+;BINARYFORMAT = BINARYFORMAT_CBM_PACKED
+BINARYFORMAT = BINARYFORMAT_IEEE754
 
         .segment "LOWCODE"
 
@@ -143,7 +144,7 @@ __float_str_to_fac:
 
 ;---------------------------------------------------------------------------------------------
 
-; get C-parameter (float), convert to FAC        
+; get C-parameter (float), convert to FAC
 ___float_float_to_fac:
 .if BINARYFORMAT = BINARYFORMAT_CBM_UNPACKED
         sta FAC_MANTISSA1   ; 3
@@ -176,6 +177,36 @@ ___float_float_to_fac:
 
         ldy sreg+1          ; 0
         sty FAC_EXPONENT    
+
+        ldx #$00
+        stx FAC_MANTISSA3
+        stx FAC_ROUNDING
+.endif
+.if BINARYFORMAT = BINARYFORMAT_IEEE754
+        ; ieee float is in A/X/sreg/sreg+1
+        sta FAC_MANTISSA2
+        stx FAC_MANTISSA1
+
+        ; shift msb from mantissa into exponent
+        asl sreg        ; mantissa msb
+        rol sreg+1      ; exp
+
+        ; sign is in carry
+        lda #$ff
+        bcs @l
+        lda #0
+@l:
+        sta FAC_SIGN
+
+        lda sreg        ; mantissa msb
+        lsr
+        ora #$80        ; msb of mantissa is always 1
+        sta FAC_MANTISSA0
+
+        lda sreg+1      ; exp
+        clc
+        adc #2
+        sta FAC_EXPONENT
 
         ldx #$00
         stx FAC_MANTISSA3
@@ -262,7 +293,42 @@ ___float_float_to_arg:
         lda ARG_SIGN
         eor FAC_SIGN
         sta FAC_SIGN_COMPARE ; sign compare
-.endif        
+.endif
+
+
+.if BINARYFORMAT = BINARYFORMAT_IEEE754
+        ; ieee float in a/x/sreg/sreg+1
+        sta ARG_MANTISSA2
+        stx ARG_MANTISSA1
+
+        asl sreg        ; mantissa msb
+        rol sreg+1      ; exp
+
+        ; sign is in carry
+        lda #$ff
+        bcs @l
+        lda #0
+@l:
+        sta ARG_SIGN
+
+        lda sreg        ; mantissa msb
+        lsr
+        ora #$80        ; the first bit in the mantissa should always be 1
+        sta ARG_MANTISSA0
+
+        lda sreg+1      ; exp
+        clc
+        adc #2
+        sta ARG_EXPONENT
+
+        ldx #$00
+        stx ARG_MANTISSA3
+
+        lda ARG_SIGN
+        eor FAC_SIGN
+        sta FAC_SIGN_COMPARE ; sign compare
+.endif
+
         jmp incsp4
 
 ; load BASIC float into ARG
@@ -315,6 +381,27 @@ ___float_fac_to_float:
 
         ldx FAC_MANTISSA1   ; 2
         lda FAC_MANTISSA2   ; 3
+.endif        
+.if BINARYFORMAT = BINARYFORMAT_IEEE754
+        ; return float in a/x/sreg/sreg+1
+        lda FAC_EXPONENT
+        sec
+        sbc #2
+        sta sreg+1          ; 0
+
+        lda FAC_MANTISSA0
+        asl
+        sta sreg            ; 1
+
+        lda FAC_SIGN        ; either $ff or $00
+        asl
+        ror sreg+1      ; exp
+        ror sreg        ; mantissa msb
+
+
+        ldx FAC_MANTISSA1   ; 2
+        lda FAC_MANTISSA2   ; 3 lsb
+
 .endif        
         rts        
 

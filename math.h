@@ -31,13 +31,17 @@ float __fastcall__ _fint(float s);
 #define fatn(_s) _fatn((_s))
 
 /* some float constants */
-#if BINARYFORMAT == BINARYFORMAT_CBM_UNPACKED   
+#if BINARYFORMAT == BINARYFORMAT_CBM_UNPACKED
 #define _f_2pi  0x0083c90f
 #define _f_pi   0x0082c90f
-#endif
-#if BINARYFORMAT == BINARYFORMAT_CBM_PACKED   
+#elif BINARYFORMAT == BINARYFORMAT_CBM_PACKED
 #define _f_2pi  0x83490fda
 #define _f_pi   0x82490fda
+#elif BINARYFORMAT == BINARYFORMAT_IEEE754
+#define _f_2pi  0x40c90fdb
+#define _f_pi   0x40490fdb
+#else
+#error "BINARYFORMAT must be defined"
 #endif
 
 #define M_PI    _f_pi
