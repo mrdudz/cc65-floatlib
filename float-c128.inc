@@ -23,16 +23,16 @@ FAC_ROUNDING     = $70
 ; Mapping the C128 p224 / Programmers 522 (but the jump table
 ; value at the given location)
 BASIC_FAC_Not       = $8ffa     ; in/out: FAC updated (negates sign routine, but NOT appears to be two's complement in BASIC)
-BASIC_FAC_Cos       = $9409     ; in/out: FAC updated
-BASIC_FAC_Sin       = $9410     ; in/out: FAC updated
-BASIC_FAC_Tan       = $9459     ; in/out: FAC updated
-BASIC_FAC_Atn       = $94b3     ; in/out: FAC updated
-BASIC_FAC_Rnd       = $8434     ; in/out: FAC updated
-BASIC_FAC_Int       = $8cfb     ; in/out: FAC updated
-BASIC_FAC_Sqr       = $8fb7     ; in/out: FAC updated
-BASIC_FAC_Exp       = $9033     ; in/out: FAC updated
-BASIC_FAC_Log       = $89ca     ; in/out: FAC updated
-BASIC_FAC_Round     = $8c47     ; in/out: FAC updated
+BASIC_FAC_Cos       = $9409     ; in/out: FAC updated (p 227)
+BASIC_FAC_Sin       = $9410     ; in/out: FAC updated (p 227)
+BASIC_FAC_Tan       = $9459     ; in/out: FAC updated (p 227)
+BASIC_FAC_Atn       = $94b3     ; in/out: FAC updated (p 227)
+BASIC_FAC_Rnd       = $8434     ; in/out: FAC updated (p 220)
+BASIC_FAC_Int       = $8cfb     ; in/out: FAC updated (p 224)
+BASIC_FAC_Sqr       = $8fb7     ; in/out: FAC updated (p 225)
+BASIC_FAC_Exp       = $9033     ; in/out: FAC updated (p 225)
+BASIC_FAC_Log       = $89ca     ; in/out: FAC updated (p 223)
+BASIC_FAC_Round     = $8c47     ; in/out: FAC updated (p 224)
 BASIC_FAC_Sgn       = $8c65     ; in/out: FAC updated
 BASIC_FAC_Abs       = $8c84     ; in/out: FAC updated
 
