@@ -91,14 +91,14 @@ void testatan2(void)
 {
     for(i = 0; i < YNUM; i++) {
         fx = CXNUM2+(ftoi(fmul(fsin(deg2rad(itof(i),itof(CYNUM))),itof(CYNUM2)))/(CYNUM/CXNUM));
-        
+
         fs = deg2rad(itof(i), itof(CYNUM));
         fd = fmul(fcos(fs), itof(CYNUM2));
         fy = CXNUM2 + (ftoi(fd) / (CYNUM/CXNUM));
-        
+
         cplot(fx, fy);
         fd = fatan2(itof(fx-CXNUM2), itof(fy-CYNUM2));
-        _ftostr(strbuf, fd);    
+        _ftostr(strbuf, fd);
         cputs(strbuf);
    }
 }
@@ -186,7 +186,7 @@ void f1(void)
 
 void testbinary(void)
 {
-    
+
     n= 5;b=itof(n);printf("%d:0x%08lx\n", n, ftobin(b));
     n=-5;b=itof(n);printf("%d:0x%08lx\n", n, ftobin(b));
     n= 2;b=itof(n);printf("%d:0x%08lx\n", n, ftobin(b));
@@ -214,7 +214,7 @@ void testconversions(void)
     printf("b:0x%08lx\n", ftobin(b));
     n=ftoi(b);
     printf("n:%d\n", n);
-    
+
     b=atof("1234");
     printf("b:0x%08lx\n", ftobin(b));
     n=ftoi(b);
@@ -223,7 +223,7 @@ void testconversions(void)
     printf("s:%s\n", strbuf);
 
     printf("a:%s\n", _ftostr(strbuf, itof(1234)));
-    
+
     printf("a:%s b:%s c:%s\n",
            _ftostr(strbuf, itof(1234)),
            _ftostr(strbuf2, itof(5678)),
@@ -234,13 +234,13 @@ void testconversions(void)
 void testbasicmath(void)
 {
     t=123;
-    fd=itof((int)t); 
+    fd=itof((int)t);
     fs=_fneg(fd);
-    _ftostr(strbuf,fd);    
+    _ftostr(strbuf,fd);
     printf("123:%s\n",strbuf);
-    _ftostr(strbuf,fs);    
+    _ftostr(strbuf,fs);
     printf("-123:%s\n",strbuf);
-    
+
     a = itof(4321);
     b = itof(1234);
     printf("4321:0x%08lx\n", ftobin(a));
@@ -249,7 +249,7 @@ void testbasicmath(void)
     printf("4321+1234:0x%08lx\n", ftobin(c1));
     ftoa(strbuf, c1);
     printf("4321+1234:%s\n", strbuf);
-    
+
     a = itof(1111);
     b = itof(2222);
     printf("1111:0x%08lx\n", ftobin(a));
@@ -259,28 +259,28 @@ void testbasicmath(void)
     ftoa(strbuf, c1);
     printf("1111-2222:%s\n", strbuf);
 
-    fd=itof((int)t); 
-    fs=itof((int)2); 
+    fd=itof((int)t);
+    fs=itof((int)2);
     fd=fdiv(fd,fs);
-    _ftostr(strbuf,fd);    
+    _ftostr(strbuf,fd);
     printf("t:%s\n",strbuf);
-    
+
     // 1234 / 60 = 20,5666...
     t=1234;
-    fd=itof((int)t); 
-    fs=itof((int)60); 
+    fd=itof((int)t);
+    fs=itof((int)60);
     fd=fdiv(fd,fs);
-    _ftostr(strbuf,fd);    
+    _ftostr(strbuf,fd);
     printf("t:%s\n",strbuf);
 
     // 5678 / 60 = 94,6333...
     t=5678;
-    fd=itof((int)t); 
-    fs=itof((int)60); 
+    fd=itof((int)t);
+    fs=itof((int)60);
     fd=fdiv(fd,fs);
-    _ftostr(strbuf,fd);    
+    _ftostr(strbuf,fd);
     printf("t:%s\n",strbuf);
-    
+
     a = itof(10);
     b = fpow(a,itof(1)); printf("0x%08lx %s\n", ftobin(b), ftoa(strbuf,b));
     b = fpow(a,itof(2)); printf("0x%08lx %s\n", ftobin(b), ftoa(strbuf,b));
@@ -351,9 +351,9 @@ int main(void)
 //    testbinary();
 //    testcompare();
     testprinting();
-#if 0    
+#if 0
     f1();
-    
+
     calcsin();
     calccos();
     testatan2();        // FIXME
