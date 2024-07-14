@@ -51,12 +51,8 @@ __basicoff:
 ; used from further written ml-math routines aswell. (maybe also from the compiler?!)
 ;---------------------------------------------------------------------------------------------
 
-.if .defined(__VIC20__)
-        .include "float-vic20.inc"
-.else
         .include "float.inc"
-.endif
-        
+
         .importzp sreg, ptr1
 
 ;---------------------------------------------------------------------------------------------
