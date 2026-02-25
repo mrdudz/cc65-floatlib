@@ -17,12 +17,33 @@ double my_floor_2(double num) {
 }
 #endif
 
+/* C128: VAL_1 ($8052) reads strings from bank 1 and cannot be called from bank 0.
+ * Provide a simple decimal-integer parser using the existing float operations.
+ * TODO: add decimal-point and exponent support if needed. */
+#if defined(__C128__)
+float __fastcall__ _strtof(char *s)
+{
+    int n = 0;
+    char neg = 0;
+
+    if (*s == '-') { neg = 1; s++; }
+    else if (*s == '+') { s++; }
+
+    while (*s >= '0' && *s <= '9') {
+        n = n * 10 + (*s - '0');
+        s++;
+    }
+    if (neg) return fneg(itof(n));
+    return itof(n);
+}
+#endif
+
 /* FIXME: this is really too simple */
 float ffloor(float x)
 {
     signed long n;
     float d;
-    
+
     n = ftol(x);
     d = ltof(n);
 
@@ -30,17 +51,17 @@ float ffloor(float x)
         return d;
     }
     return fsub(d, 1);
-} 
+}
 
 // convert float into a string. this is surprisingly complex, so we just use
 // the kernal function, and then fix up the result
 
-char *ftoa(char *buf, float n) 
-{ 
+char *ftoa(char *buf, float n)
+{
     char i, ii, epos = 0, ex;
     char tempbuf[0x20];
     _ftostr(tempbuf, n);
-    
+
     // find position of the 'e'
     i=0;while(tempbuf[i]) {
         if (tempbuf[i] == 69) { /* 'e' */
@@ -49,14 +70,14 @@ char *ftoa(char *buf, float n)
         }
         i++;
     }
-    
+
     if (epos == 0) {
         i = ii = 0;
         // no exponent, we can return the number as is
         if (tempbuf[i] == '-') {
             buf[ii] = tempbuf[i];
             i++;ii++;
-        } 
+        }
 //         else {
 //             buf[ii] = ' ';
 //             ii++;
@@ -79,12 +100,12 @@ char *ftoa(char *buf, float n)
         buf[ii] = 0;
     } else {
         // we have an exponent, get rid of it
-        
+
         i = ii = 0;
         if (tempbuf[i] == '-') {
             buf[ii] = tempbuf[i];
             i++;ii++;
-        } 
+        }
 //         else {
 //             buf[ii] = ' ';
 //             ii++;
@@ -93,18 +114,18 @@ char *ftoa(char *buf, float n)
         if (tempbuf[i] == ' ') {
             i++;
         }
-        
+
         ex = ((tempbuf[epos+2] - '0') * 10) + (tempbuf[epos+3] - '0');
 
         if (tempbuf[epos+1] == '+') {
             // positive exponent, move decimal point to right, add zeros to the right
-            
+
             // first copy until we see either the decimal point, or the 'e'
             while (tempbuf[i] && tempbuf[i] != '.' && tempbuf[i] != 69) {
                 buf[ii] = tempbuf[i];
                 i++;ii++;
             }
-            
+
             // 'e' found, add as many zeros as in the exponent
             if (tempbuf[i] == 69) {
                 while(ex) {
@@ -129,15 +150,15 @@ char *ftoa(char *buf, float n)
                     ex--;
                 }
             }
-            
+
         } else {
             // negative exponent, move decimal point to left, add zeros to left
-            
+
             buf[ii] = '0'; ii++;
             buf[ii] = '.'; ii++;
 
             ex--;
-            
+
             // add zeros
             while(ex) {
                 buf[ii] = '0';
@@ -152,10 +173,10 @@ char *ftoa(char *buf, float n)
                 buf[ii] = tempbuf[i];
                 i++;ii++;
             }
-            
+
         }
         buf[ii] = 0;
     }
-    
-    return buf; 
+
+    return buf;
 }

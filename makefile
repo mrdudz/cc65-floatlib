@@ -13,6 +13,10 @@ ifeq ($(SYS),vic20)
   CC65_FLAGS = -C vic20-32k.cfg
 endif
 
+ifeq ($(SYS),c128)
+  VICE_CMD = x128
+endif
+
 all: runtime.lib floattest.prg floattest
 
 runtime.lib: float.s floatc.c float.inc
@@ -22,9 +26,9 @@ runtime.lib: float.s floatc.c float.inc
 	ar65 a runtime.lib float.o floatc.o
 
 floattest.prg: runtime.lib math.h float.h floattest.c
-#	cl65 $(CC65_FLAGS) -Osir floattest.c runtime.lib -o floattest.prg
-	cl65 $(CC65_FLAGS) floattest.c runtime.lib -o floattest.prg
-#	cc65 $(CC65_FLAGS) floattest.c -o floattest.s
+#	cl65 -t $(SYS) $(CC65_FLAGS) -Osir floattest.c runtime.lib -o floattest.prg
+	cl65 -t $(SYS) $(CC65_FLAGS) floattest.c runtime.lib -o floattest.prg
+#	cc65 -t $(SYS) $(CC65_FLAGS) floattest.c -o floattest.s
 
 floattest: floattest.c math.h float.h
 	gcc -O2 -W -Wall -Wextra -o floattest -lm floattest.c
